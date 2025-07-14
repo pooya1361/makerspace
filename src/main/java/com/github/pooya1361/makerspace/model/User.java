@@ -1,8 +1,10 @@
 package com.github.pooya1361.makerspace.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.pooya1361.makerspace.model.enums.UserType;
 import jakarta.persistence.*; // Use jakarta.persistence for Spring Boot 3+
 import lombok.Data; // From Lombok, for getters, setters, etc.
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.util.Set;
@@ -34,6 +36,8 @@ public class User {
 
     // A user can be an instructor for many scheduled lessons
     @OneToMany(mappedBy = "instructor", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    @EqualsAndHashCode.Exclude
     private Set<ScheduledLesson> taughtLessons = new HashSet<>();
 
     // A user can cast many votes

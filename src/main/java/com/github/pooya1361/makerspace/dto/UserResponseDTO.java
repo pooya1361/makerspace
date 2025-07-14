@@ -15,11 +15,4 @@ public class UserResponseDTO {
     private String username;
     private String email;
     private UserType userType;
-
-    public UserResponseDTO(User user) {
-        this.id = user.getId();
-        this.username = user.getUsername();
-        this.email = user.getEmail();
-        this.userType = user.getUserType();
-    }
 }

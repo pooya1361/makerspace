@@ -2,6 +2,7 @@ package com.github.pooya1361.makerspace.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
@@ -36,5 +37,6 @@ public class ScheduledLesson {
 
     // This will hold the proposed time slots for voting for THIS specific lesson instance
     @OneToMany(mappedBy = "scheduledLesson", cascade = CascadeType.ALL, orphanRemoval = true)
+    @EqualsAndHashCode.Exclude
     private Set<ProposedTimeSlot> proposedTimeSlots = new HashSet<>();
 }

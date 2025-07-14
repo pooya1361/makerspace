@@ -13,18 +13,18 @@ public class ActivityResponseDTO {
     private Long id;
     private String name;
     private String description;
-    private Workshop workshop;
+    private WorkshopResponseDTO workshop;
 
-    public ActivityResponseDTO(Activity activity) {
-        this.id = activity.getId();
-        this.name = activity.getName();
-        this.description = activity.getDescription();
-
-        this.workshop = null;
-        Workshop workshop = activity.getWorkshop();
-        if (workshop != null) {
-            this.workshop = new Workshop(workshop);
-        }
-    }
+//    public ActivityResponseDTO(Activity activity) {
+//        this.id = activity.getId();
+//        this.name = activity.getName();
+//        this.description = activity.getDescription();
+//
+//        this.workshop = null;
+//        Workshop workshop = activity.getWorkshop();
+//        if (workshop != null) {
+//            this.workshop = new Workshop(workshop);
+//        }
+//    }
 
 }

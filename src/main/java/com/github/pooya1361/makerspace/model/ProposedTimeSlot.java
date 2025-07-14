@@ -1,8 +1,10 @@
 package com.github.pooya1361.makerspace.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
@@ -30,5 +32,7 @@ public class ProposedTimeSlot {
     // We can count the votes for this time slot via a bidirectional relationship
     // MappedBy is on the side that owns the foreign key
     @OneToMany(mappedBy = "proposedTimeSlot", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    @EqualsAndHashCode.Exclude
     private Set<Vote> votes = new HashSet<>();
 }
