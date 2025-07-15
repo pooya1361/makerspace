@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/activities")
 @Tag(name = "Activity management", description = "Endpoints for activity administration")
 public class ActivityController {
     private final ActivityRepository activityRepository;
@@ -28,7 +28,7 @@ public class ActivityController {
         this.activityRepository = activityRepository;
     }
 
-    @GetMapping("/activities")
+    @GetMapping()
     public ResponseEntity<List<ActivityResponseDTO>> getActivities() {
         List<Activity> activities = activityRepository.findAll();
         List<ActivityResponseDTO> activityResponseDTOs = activityMapper.toDtoList(activities);

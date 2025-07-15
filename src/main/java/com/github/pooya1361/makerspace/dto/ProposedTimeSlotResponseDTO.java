@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 public class ProposedTimeSlotResponseDTO {
     private Long id;
     private LocalDateTime proposedStartTime;
-    private ScheduledLessonResponseDTO scheduledLesson;
-    private Set<VoteResponseDTO> votes = new HashSet<>();
-
+    private ScheduledLessonSummaryDTO scheduledLesson;
+    // private Set<VoteResponseDTO> votes = new HashSet<>();
 }

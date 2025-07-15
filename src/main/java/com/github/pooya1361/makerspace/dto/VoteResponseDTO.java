@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class VoteResponseDTO {
     private Long id;
-    // private ProposedTimeSlotResponseDTO proposedTimeSlot;
-    private UserResponseDTO user;
+    private ProposedTimeSlotSummaryDTO  proposedTimeSlot;
+    private UserSummaryDTO  user;
 }
