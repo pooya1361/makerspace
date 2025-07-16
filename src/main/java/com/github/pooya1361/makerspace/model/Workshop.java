@@ -18,43 +18,8 @@ public class Workshop {
     @Column(nullable = false, unique = true)
     private String name;
 
-    @Column(nullable = true) // Ensures username is not null and is unique
     private String description;
-    @Column(nullable = true) // Ensures username is not null and is unique
+
     private double size;
 
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public double getSize() {
-        return size;
-    }
-
-    public void setSize(double size) {
-        this.size = size;
-    }
-
-    public Workshop(Workshop workshop) {
-        this.id = workshop.getId();
-        this.name = workshop.getName();
-        this.description = workshop.getDescription();
-        this.size = workshop.getSize();
-    }
 }

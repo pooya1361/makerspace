@@ -1,5 +1,6 @@
-package com.github.pooya1361.makerspace.dto;
+package com.github.pooya1361.makerspace.dto.summary;
 
+import com.github.pooya1361.makerspace.dto.response.LessonResponseDTO;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -13,4 +14,6 @@ public class ScheduledLessonSummaryDTO {
     private Long id;
     private LocalDateTime startTime;
     private Long durationInMinutes;
+    private LessonResponseDTO lesson;
+    private UserSummaryDTO instructor;
 }

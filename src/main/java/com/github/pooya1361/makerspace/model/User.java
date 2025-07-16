@@ -34,16 +34,6 @@ public class User {
     @Column(name = "user_type", nullable = false)
     private UserType userType = UserType.NORMAL;
 
-    // A user can be an instructor for many scheduled lessons
-    @OneToMany(mappedBy = "instructor", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
-    @EqualsAndHashCode.Exclude
-    private Set<ScheduledLesson> taughtLessons = new HashSet<>();
-
-    // A user can cast many votes
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Vote> votes = new HashSet<>();
-
     @Override
     public String toString() {
         return this.getUsername() + " - " + this.getEmail() + " (" + this.getUserType() + ")";

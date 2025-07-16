@@ -1,44 +1,62 @@
+// src/main/java/com/github/pooya1361/makerspace/controller/UserController.java
 package com.github.pooya1361.makerspace.controller;
 
-import com.github.pooya1361.makerspace.mapper.UserMapper;
-import com.github.pooya1361.makerspace.model.User;
-import com.github.pooya1361.makerspace.dto.UserResponseDTO;
-import com.github.pooya1361.makerspace.repository.UserRepository;
+import com.github.pooya1361.makerspace.dto.create.UserCreateDTO;
+import com.github.pooya1361.makerspace.dto.response.UserResponseDTO;
+import com.github.pooya1361.makerspace.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api")
-@Tag(name = "User Management", description = "Endpoints for user administration") // <-- Tag to group endpoints
+@RequestMapping("/api/users")
+@Tag(name = "User Management", description = "Endpoints for user administration")
 public class UserController {
-    private final UserRepository userRepository;
 
-    @Autowired
-    public UserMapper userMapper;
+    private final UserService userService;
 
-    @Autowired // Spring automatically injects UserRepository
-    public UserController(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public UserController(UserService userService) {
+        this.userService = userService;
     }
 
-    @GetMapping("/test")
-    public String test() {
-        return "API works!";
+    @PostMapping
+    @Operation(summary = "Create a new user", description = "Registers a new user in the system.")
+    public ResponseEntity<UserResponseDTO> createUser(@Valid @RequestBody UserCreateDTO userCreateDTO) {
+        UserResponseDTO createdUser = userService.createUser(userCreateDTO);
+        return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
     }
 
-    @GetMapping("/users")
+    @GetMapping
     @Operation(summary = "Get all users", description = "Retrieves a list of all registered users in the system.")
-    public ResponseEntity<List<UserResponseDTO>> getUsers() {
-        List<UserResponseDTO> userResponseDTOs = userMapper.toDtoList(userRepository.findAll());
-        return new ResponseEntity<>(userResponseDTOs, HttpStatus.OK);
+    public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
+        List<UserResponseDTO> users = userService.getAllUsers();
+        return ResponseEntity.ok(users);
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Get a user by id", description = "Retrieves a user from the system by their ID.")
+    public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long id) {
+        return userService.getUserById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PatchMapping("/{id}")
+    @Operation(summary = "Update a user", description = "Updates an existing user's information.")
+    public ResponseEntity<UserResponseDTO> updateUser(@PathVariable Long id, @Valid @RequestBody UserCreateDTO userUpdateDTO) {
+        UserResponseDTO updatedUser = userService.updateUser(id, userUpdateDTO);
+        return ResponseEntity.ok(updatedUser);
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete a user", description = "Removes a user from the system.")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
     }
 }

@@ -1,10 +1,12 @@
 package com.github.pooya1361.makerspace.mapper;
 
-import com.github.pooya1361.makerspace.dto.UserResponseDTO;
-import com.github.pooya1361.makerspace.dto.UserSummaryDTO;
+import com.github.pooya1361.makerspace.dto.create.UserCreateDTO;
+import com.github.pooya1361.makerspace.dto.create.WorkshopCreateDTO;
+import com.github.pooya1361.makerspace.dto.response.UserResponseDTO;
+import com.github.pooya1361.makerspace.dto.summary.UserSummaryDTO;
 import com.github.pooya1361.makerspace.model.User;
-import org.mapstruct.Mapper;
-import org.mapstruct.Named;
+import com.github.pooya1361.makerspace.model.Workshop;
+import org.mapstruct.*;
 
 import java.util.List;
 
@@ -14,4 +16,10 @@ public interface UserMapper {
     List<UserResponseDTO> toDtoList(List<User> users);
     @Named("toUserSummaryDto")
     UserSummaryDTO toSummaryDto(User user);
+
+    User toEntity(UserCreateDTO userCreateDTO);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "id", ignore = true)
+    void updateUserFromDto(UserCreateDTO updateDTO, @MappingTarget User user);
 }

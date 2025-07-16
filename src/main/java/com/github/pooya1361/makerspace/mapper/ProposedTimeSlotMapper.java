@@ -1,11 +1,12 @@
 package com.github.pooya1361.makerspace.mapper;
 
-import com.github.pooya1361.makerspace.dto.ProposedTimeSlotResponseDTO;
-import com.github.pooya1361.makerspace.dto.ProposedTimeSlotSummaryDTO;
+import com.github.pooya1361.makerspace.dto.create.ProposedTimeSlotCreateDTO;
+import com.github.pooya1361.makerspace.dto.create.VoteCreateDTO;
+import com.github.pooya1361.makerspace.dto.response.ProposedTimeSlotResponseDTO;
+import com.github.pooya1361.makerspace.dto.summary.ProposedTimeSlotSummaryDTO;
 import com.github.pooya1361.makerspace.model.ProposedTimeSlot;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Named;
+import com.github.pooya1361.makerspace.model.Vote;
+import org.mapstruct.*;
 
 import java.util.Set;
 import java.util.List;
@@ -18,4 +19,14 @@ public interface ProposedTimeSlotMapper {
     List<ProposedTimeSlotResponseDTO> toDtoList(List<ProposedTimeSlot> proposedTimeSlots); // For List conversion
     @Named("toProposedTimeSlotSummaryDto")
     ProposedTimeSlotSummaryDTO toSummaryDto(ProposedTimeSlot proposedTimeSlot);
+
+    @Mapping(target = "scheduledLesson", ignore = true)
+    ProposedTimeSlot toEntity(ProposedTimeSlotCreateDTO proposedTimeSlotCreateDTO);
+
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "scheduledLesson", ignore = true) // Updated in service
+    @Mapping(target = "votes", ignore = true) // Collection ignored
+    void updateProposedTimeSlotFromDto(ProposedTimeSlotCreateDTO updateDTO, @MappingTarget ProposedTimeSlot proposedTimeSlot);
 }

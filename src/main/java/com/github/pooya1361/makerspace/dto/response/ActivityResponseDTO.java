@@ -1,7 +1,5 @@
-package com.github.pooya1361.makerspace.dto;
+package com.github.pooya1361.makerspace.dto.response;
 
-import com.github.pooya1361.makerspace.model.Activity;
-import com.github.pooya1361.makerspace.model.Workshop;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;

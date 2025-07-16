@@ -1,5 +1,5 @@
 // src/main/java/com/github/pooya1361/makerspace/dto/ProposedTimeSlotSummaryDTO.java
-package com.github.pooya1361.makerspace.dto;
+package com.github.pooya1361.makerspace.dto.summary;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

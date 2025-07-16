@@ -1,14 +1,11 @@
-package com.github.pooya1361.makerspace.dto;
+package com.github.pooya1361.makerspace.dto.response;
 
-import com.github.pooya1361.makerspace.model.ProposedTimeSlot;
+import com.github.pooya1361.makerspace.dto.summary.ScheduledLessonSummaryDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Data
 @NoArgsConstructor

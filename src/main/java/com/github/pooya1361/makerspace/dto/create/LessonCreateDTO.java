@@ -1,4 +1,4 @@
-package com.github.pooya1361.makerspace.dto;
+package com.github.pooya1361.makerspace.dto.create;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
