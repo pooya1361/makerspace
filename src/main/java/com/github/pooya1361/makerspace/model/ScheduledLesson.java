@@ -1,11 +1,14 @@
 package com.github.pooya1361.makerspace.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.Set;
 import java.util.HashSet;
 
@@ -21,7 +24,8 @@ public class ScheduledLesson {
     private Long id;
 
     @Column(name = "start_time")
-    private LocalDateTime startTime;
+    @JsonProperty(required = false)
+    private Optional<LocalDateTime> startTime;
 
     @Column(name = "duration_in_minutes", nullable = false)
     private Long durationInMinutes;

@@ -11,7 +11,7 @@ import org.mapstruct.*;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring", uses = {LessonMapper.class, UserMapper.class})
+@Mapper(componentModel = "spring", uses = {LessonMapper.class, UserMapper.class, OptionalMapper.class, ProposedTimeSlotMapper.class})
 public interface ScheduledLessonMapper {
     ScheduledLessonResponseDTO toDto(ScheduledLesson scheduledLesson);
     List<ScheduledLessonResponseDTO> toDtoList(List<ScheduledLesson> scheduledLessons);

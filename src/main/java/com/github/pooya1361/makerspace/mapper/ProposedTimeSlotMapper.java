@@ -11,9 +11,8 @@ import org.mapstruct.*;
 import java.util.Set;
 import java.util.List;
 
-@Mapper(componentModel = "spring", uses = {ScheduledLessonMapper.class})
+@Mapper(componentModel = "spring", uses = {ScheduledLessonMapper.class, OptionalMapper.class, ProposedTimeSlotMapper.class})
 public interface ProposedTimeSlotMapper {
-//    @Mapping(target = "votes", ignore = true)
     ProposedTimeSlotResponseDTO toDto(ProposedTimeSlot proposedTimeSlot);
     Set<ProposedTimeSlotResponseDTO> toDtoSet(Set<ProposedTimeSlot> proposedTimeSlots); // For Set conversion
     List<ProposedTimeSlotResponseDTO> toDtoList(List<ProposedTimeSlot> proposedTimeSlots); // For List conversion
