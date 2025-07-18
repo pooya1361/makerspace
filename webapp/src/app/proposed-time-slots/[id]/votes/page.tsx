@@ -1,35 +1,8 @@
-// This is a Server Component, no 'use client'; needed
+import { apiSlice } from '@/app/lib/features/api/apiSlice';
+import { store } from '@/app/lib/store';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { VoteResponseDTO, ProposedTimeSlot } from '@/app/interfaces/api'; // Your generated types
-
-// Function to fetch votes for a specific proposed time slot
-async function getVotesForProposedTimeSlot(slotId: string): Promise<VoteResponseDTO[] | null> {
-    try {
-        // IMPORTANT: Use the FULL ABSOLUTE URL for server-side fetches to your backend.
-        // Replace 'http://localhost:8080' with your actual backend URL.
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/proposed-time-slots/${slotId}`, {
-            // Optional: Cache control. Next.js caches fetch requests by default.
-            // cache: 'no-store', // To always fetch fresh data
-            // next: { revalidate: 60 }, // To revalidate data every 60 seconds
-        });
-
-        if (!res.ok) {
-            if (res.status === 404) {
-                console.warn(`Proposed Time Slot with ID ${slotId} not found or has no votes.`);
-                return null; // Return null to trigger notFound() or handle no data
-            }
-            console.error(`Failed to fetch votes for slot ${slotId}:`, res.status, res.statusText);
-            throw new Error(`Failed to fetch votes: ${res.statusText}`);
-        }
-
-        const data = await res.json();
-        return data.votes;
-    } catch (error) {
-        console.error(`Error fetching votes for slot ${slotId}:`, error);
-        return null; // Return null on error
-    }
-}
+import { VoteResponseDTO } from '@/app/interfaces/api'; // Your generated types
 
 interface ProposedTimeSlotVotesPageProps {
     params: { id: string };
@@ -40,17 +13,17 @@ interface ProposedTimeSlotVotesPageProps {
 export default async function ProposedTimeSlotVotesPage({ params, searchParams }: ProposedTimeSlotVotesPageProps) {
     // const params = await paramsPromise;
     const proposedTimeSlotId = params.id;
+    console.log("🚀 ~ ProposedTimeSlotVotesPage ~ proposedTimeSlotId:", proposedTimeSlotId)
     const scheduledLessonId = searchParams.scheduledLessonId;
-    const votes = await getVotesForProposedTimeSlot(proposedTimeSlotId);
 
-    // You might want to fetch the ProposedTimeSlot details here too if you need its name/info
-    // For simplicity, we'll just display the ID in the title for now.
-    // const proposedTimeSlotDetails: ProposedTimeSlot | null = await getProposedTimeSlotDetails(proposedTimeSlotId);
 
-    if (!votes || votes.length === 0) {
-        // If votes is null (e.g., 404 or other fetch error), you might show a message or notFound()
-        // For now, let's just say no votes found.
-        // If you want a full 404 page for a non-existent slot, check `proposedTimeSlotDetails` too.
+    const { data: proposedTimeSlot, isError, error } = await store.dispatch(
+        apiSlice.endpoints.getVotesForProposedTimeSlot.initiate(proposedTimeSlotId)
+    );
+
+    if (isError) {
+        console.error("Error fetching votes:", error);
+        // You might want to render a specific error page or message
         return (
             <div className="container mx-auto p-6 text-center">
                 <h1 className="text-3xl font-bold text-blue-800 mb-4">Votes for Proposed Time Slot ID: {proposedTimeSlotId}</h1>
@@ -62,6 +35,13 @@ export default async function ProposedTimeSlotVotesPage({ params, searchParams }
                 </div>
             </div>
         );
+    }
+
+    const votes = proposedTimeSlot?.votes;
+
+    // If lesson is null/undefined after dispatch, it means it wasn't found (e.g., 404 from backend)
+    if (!votes) {
+        notFound(); // Triggers Next.js's not-found.tsx page
     }
 
     return (

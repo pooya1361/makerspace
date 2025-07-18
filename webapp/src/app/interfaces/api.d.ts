@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-// Generated using typescript-generator version 3.2.1263 on 2025-07-17 17:12:17.
+// Generated using typescript-generator version 3.2.1263 on 2025-07-18 15:14:19.
 
 export interface ActivityCreateDTO {
     name: string;

@@ -2,17 +2,12 @@
 // This is a Server Component for fetching and displaying single lesson details.
 // 'use client';
 
+import { LessonResponseDTO } from '@/app/interfaces/api';
+import { apiSlice } from '@/app/lib/features/api/apiSlice';
+import { store } from '@/app/lib/store';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 
-// Define the Lesson type, consistent with your backend Lesson DTO/Entity
-interface Lesson {
-    id: number;
-    name: string;
-    description: string;
-    // Add more fields as per your backend's Lesson model
-    // e.g., difficultyLevel?: string;
-    //       instructorName?: string;
-}
 
 // Define the props for this page component (dynamic segment 'id')
 interface LessonDetailsPageProps {
@@ -21,33 +16,35 @@ interface LessonDetailsPageProps {
     }>;
 }
 
-// Function to fetch a single lesson by ID from your Spring Boot backend
-async function getLessonById(id: string): Promise<Lesson | null> {
-    try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/lessons/${id}`);
-
-        if (!res.ok) {
-            if (res.status === 404) {
-                console.warn(`Lesson with ID ${id} not found.`);
-                return null;
-            }
-            console.error(`Failed to fetch lesson ${id}:`, res.status, res.statusText);
-            throw new Error('Failed to fetch lesson details.');
-        }
-        const data = await res.json();
-        return data;
-    } catch (error) {
-        console.error(`Error fetching lesson ${id}:`, error);
-        return null; // Return null on error
-    }
-}
-
 export default async function LessonDetailsPage({ params: paramsPromise }: LessonDetailsPageProps) {
     // Await the params Promise first, then destructure
     const params = await paramsPromise;
-    const { id } = params;
+    const { id: lessonId } = params;
 
-    const lesson = await getLessonById(id); // Fetch data using the ID from params
+    const { data: lesson, isError, error } = await store.dispatch(
+        apiSlice.endpoints.getLessonById.initiate(lessonId)
+    );
+
+    // const lesson = await getLessonById(lessonId); // Fetch data using the ID from params
+
+    if (isError) {
+        console.error("Error fetching lesson:", error);
+        // You might want to render a specific error page or message
+        return (
+            <div className="container mx-auto p-6 text-center">
+                <h1 className="text-3xl font-bold text-red-600 mb-4">Error loading lesson details.</h1>
+                <p className="text-gray-600">Please try again later.</p>
+                <Link href="/lessons" className="mt-4 inline-block bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700">
+                    Back to Lessons
+                </Link>
+            </div>
+        );
+    }
+
+    // If lesson is null/undefined after dispatch, it means it wasn't found (e.g., 404 from backend)
+    if (!lesson) {
+        notFound(); // Triggers Next.js's not-found.tsx page
+    }
 
     if (!lesson) {
         // Handle the case where the lesson is not found or an error occurred
@@ -66,30 +63,13 @@ export default async function LessonDetailsPage({ params: paramsPromise }: Lesso
         <div className="container mx-auto p-6 md:p-10 bg-white shadow-lg rounded-lg mt-8 mb-12">
             <h1 className="text-4xl font-bold text-purple-800 mb-6 text-center">{lesson.name}</h1>
 
-            {/* If you have an image for the lesson */}
-            {/* {lesson.imageUrl && (
-        <div className="mb-6">
-          <img src={lesson.imageUrl} alt={lesson.name} className="w-full h-96 object-cover rounded-lg" />
-        </div>
-      )} */}
-
             <p className="text-lg text-gray-700 leading-relaxed mb-8">
                 {lesson.description}
             </p>
 
-            {/* Add more lesson details here as needed */}
-            {/* Example:
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-        <div>
-          <h3 className="text-xl font-semibold text-gray-800">Difficulty:</h3>
-          <p className="text-gray-600">{lesson.difficultyLevel}</p>
-        </div>
-        <div>
-          <h3 className="text-xl font-semibold text-gray-800">Instructor:</h3>
-          <p className="text-gray-600">{lesson.instructorName}</p>
-        </div>
-      </div>
-      */}
+            <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+                {lesson.activity.name} [{lesson.activity.workshop.name}]
+            </p>
 
             <div className="mt-10 text-center">
                 <Link href="/lessons" className="inline-block bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition duration-300 text-lg">
