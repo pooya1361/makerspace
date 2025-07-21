@@ -1,18 +1,18 @@
-package com.github.pooya1361.makerspace.dto.create;
+package com.github.pooya1361.makerspace.dto.summary;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Optional;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ActivityCreateDTO {
-    @NotNull(message = "Name cannot be null")
+public class WorkshopSummaryDTO {
+    private Long id;
     private String name;
     private String description;
-    private Long workshopId;
+    private double size;
 }

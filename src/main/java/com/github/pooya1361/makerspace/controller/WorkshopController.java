@@ -30,8 +30,9 @@ public class WorkshopController {
 
     @GetMapping
     @Operation(summary = "Get all workshops", description = "Retrieves a list of all workshops in the system")
-    public List<Workshop> getWorkshops() {
-        return workshopRepository.findAll();
+    public ResponseEntity<List<WorkshopResponseDTO>> getWorkshops() {
+        List<WorkshopResponseDTO> workshops = workshopService.getAllWorkshops();
+        return ResponseEntity.ok(workshops);
     }
 
 

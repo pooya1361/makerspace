@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-// Generated using typescript-generator version 3.2.1263 on 2025-07-18 15:14:19.
+// Generated using typescript-generator version 3.2.1263 on 2025-07-21 14:23:29.
 
 export interface ActivityCreateDTO {
     name: string;
@@ -38,16 +38,18 @@ export interface VoteCreateDTO {
 }
 
 export interface WorkshopCreateDTO {
+    id: number;
     name: string;
     description: string;
     size: number;
+    activityIds: number[];
 }
 
 export interface ActivityResponseDTO {
     id: number;
     name: string;
     description: string;
-    workshop: WorkshopResponseDTO;
+    workshop: WorkshopSummaryDTO;
 }
 
 export interface LessonResponseDTO {
@@ -73,6 +75,13 @@ export interface ScheduledLessonResponseDTO {
     proposedTimeSlots: ProposedTimeSlotSummaryDTO[];
 }
 
+export interface SummaryResponseDTO {
+    totalWorkshops: number;
+    totalActivities: number;
+    totalLessons: number;
+    totalScheduledLessons: number;
+}
+
 export interface UserResponseDTO {
     id: number;
     username: string;
@@ -91,6 +100,7 @@ export interface WorkshopResponseDTO {
     name: string;
     description: string;
     size: number;
+    activities: ActivitySummaryDTO[];
 }
 
 export interface Activity {
@@ -141,6 +151,14 @@ export interface Workshop {
     name: string;
     description: string;
     size: number;
+    activities: Activity[];
+}
+
+export interface WorkshopSummaryDTO {
+    id: number;
+    name: string;
+    description: string;
+    size: number;
 }
 
 export interface ScheduledLessonSummaryDTO {
@@ -167,6 +185,12 @@ export interface UserSummaryDTO {
     username: string;
     email: string;
     userType: UserType;
+}
+
+export interface ActivitySummaryDTO {
+    id: number;
+    name: string;
+    description: string;
 }
 
 export type UserType = "NORMAL" | "MODERATOR" | "ADMIN" | "SUPERADMIN";

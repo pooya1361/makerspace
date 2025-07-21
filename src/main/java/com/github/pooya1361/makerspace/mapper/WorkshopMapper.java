@@ -8,8 +8,9 @@ import com.github.pooya1361.makerspace.model.Workshop;
 import org.mapstruct.*;
 
 import java.util.List;
+import java.util.Optional;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = ActivityMapper.class)
 public interface WorkshopMapper {
     WorkshopResponseDTO toDto(Workshop workshop);
     List<WorkshopResponseDTO> toDtoList(List<Workshop> workshops);
@@ -18,5 +19,13 @@ public interface WorkshopMapper {
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE) // Important for PATCH
     @Mapping(target = "id", ignore = true) // Always ignore ID when updating
+    @Mapping(target = "activities", ignore = true)
     void updateWorkshopFromDto(WorkshopCreateDTO workshopCreateDTO, @MappingTarget Workshop workshop);
+
+    default Long map(Optional<Long> value) {
+        if (value == null) { // Check if the Optional object itself is null
+            return null;
+        }
+        return value.orElse(null);
+    }
 }

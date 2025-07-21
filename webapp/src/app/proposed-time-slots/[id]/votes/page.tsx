@@ -2,7 +2,7 @@ import { apiSlice } from '@/app/lib/features/api/apiSlice';
 import { store } from '@/app/lib/store';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { VoteResponseDTO } from '@/app/interfaces/api'; // Your generated types
+import { VoteSummaryDTO } from '@/app/interfaces/api'; // Your generated types
 
 interface ProposedTimeSlotVotesPageProps {
     params: { id: string };
@@ -10,10 +10,10 @@ interface ProposedTimeSlotVotesPageProps {
 }
 
 // This is an async Server Component function
-export default async function ProposedTimeSlotVotesPage({ params, searchParams }: ProposedTimeSlotVotesPageProps) {
-    // const params = await paramsPromise;
+export default async function ProposedTimeSlotVotesPage({ params: paramsPromise, searchParams: searchParamsPromise }: ProposedTimeSlotVotesPageProps) {
+    const params = await paramsPromise;
+    const searchParams = await searchParamsPromise;
     const proposedTimeSlotId = params.id;
-    console.log("🚀 ~ ProposedTimeSlotVotesPage ~ proposedTimeSlotId:", proposedTimeSlotId)
     const scheduledLessonId = searchParams.scheduledLessonId;
 
 
@@ -60,7 +60,7 @@ export default async function ProposedTimeSlotVotesPage({ params, searchParams }
                             </tr>
                         </thead>
                         <tbody>
-                            {votes.map((vote: VoteResponseDTO) => (
+                            {votes.map((vote: VoteSummaryDTO) => (
                                 <tr key={vote.id} className="hover:bg-gray-50">
                                     <td className="py-2 px-4 border-b text-sm text-gray-800">{vote.user?.username || 'N/A'}</td>
                                     <td className="py-2 px-4 border-b text-sm text-gray-800">{vote.user?.email}</td>

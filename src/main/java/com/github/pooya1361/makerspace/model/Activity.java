@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Optional;
+
 @Entity
 @Table(name = "activities")
 @Data
@@ -22,7 +24,7 @@ public class Activity {
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="workshop_id")
+    @JoinColumn(name="workshop_id", nullable = true)
     private Workshop workshop;
 
 }

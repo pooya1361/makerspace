@@ -1,8 +1,6 @@
 // app/lessons/[id]/page.tsx
 // This is a Server Component for fetching and displaying single lesson details.
-// 'use client';
 
-import { LessonResponseDTO } from '@/app/interfaces/api';
 import { apiSlice } from '@/app/lib/features/api/apiSlice';
 import { store } from '@/app/lib/store';
 import Link from 'next/link';
@@ -24,8 +22,6 @@ export default async function LessonDetailsPage({ params: paramsPromise }: Lesso
     const { data: lesson, isError, error } = await store.dispatch(
         apiSlice.endpoints.getLessonById.initiate(lessonId)
     );
-
-    // const lesson = await getLessonById(lessonId); // Fetch data using the ID from params
 
     if (isError) {
         console.error("Error fetching lesson:", error);

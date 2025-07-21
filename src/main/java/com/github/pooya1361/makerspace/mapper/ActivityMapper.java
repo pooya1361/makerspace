@@ -8,6 +8,7 @@ import com.github.pooya1361.makerspace.model.Workshop;
 import org.mapstruct.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @Mapper(componentModel = "spring", uses = {WorkshopMapper.class}) // Makes MapStruct generate a Spring component
 public interface ActivityMapper {
@@ -21,4 +22,11 @@ public interface ActivityMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "workshop", ignore = true) // Workshop will be updated in service
     void updateActivityFromDto(ActivityCreateDTO activityCreateDTO, @MappingTarget Activity activity);
+
+    default Long map(Optional<Long> value) {
+        if (value == null) { // Check if the Optional object itself is null
+            return null;
+        }
+        return value.orElse(null);
+    }
 }

@@ -17,11 +17,11 @@ export default function Header() {
     };
 
     return (
-        <header className="bg-blue-700 text-white p-4 shadow-md">
+        <header className="bg-linear-to-r from-indigo-500 via-violet-500 to-fuchsia-500 text-white p-4 shadow-md">
             <div className="container mx-auto flex justify-between items-center">
                 {/* Logo/Site Title */}
                 <Link href="/" className="text-2xl font-bold hover:text-blue-200 transition duration-300">
-                    Makerspace Hub
+                    Makerspace
                 </Link>
 
                 {/* Desktop Navigation */}

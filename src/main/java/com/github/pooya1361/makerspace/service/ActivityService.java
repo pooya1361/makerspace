@@ -29,12 +29,14 @@ public class ActivityService {
 
     @Transactional
     public ActivityResponseDTO createActivity(ActivityCreateDTO activityCreateDTO) {
-        Workshop workshop = workshopRepository.findById(activityCreateDTO.getWorkshopId())
-                .orElseThrow(() -> new EntityNotFoundException("Workshop not found with ID: " + activityCreateDTO.getWorkshopId()));
-
         // Convert DTO to entity, setting relationships
         Activity activity = activityMapper.toEntity(activityCreateDTO);
-        activity.setWorkshop(workshop);
+
+        if (activityCreateDTO.getWorkshopId() != null) {
+            Workshop workshop = workshopRepository.findById(activityCreateDTO.getWorkshopId())
+                    .orElseThrow(() -> new EntityNotFoundException("Workshop not found with ID: " + activityCreateDTO.getWorkshopId()));
+            activity.setWorkshop(workshop);
+        }
 
         // Save the activity
         Activity savedActivity = activityRepository.save(activity);
