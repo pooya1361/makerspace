@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class VoteCreateDTO {
+    private Long id;
     @NotNull(message = "User ID cannot be null")
     private Long userId;
-
     @NotNull(message = "Proposed Time Slot ID cannot be null")
     private Long proposedTimeSlotId;
 }

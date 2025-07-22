@@ -13,11 +13,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ScheduledLessonCreateDTO {
+    private Long id;
+    private LocalDateTime startTime;
     private Long durationInMinutes;
-
     @NotNull(message = "Lesson id cannot be null")
     private Long lessonId;
-
     @NotNull(message = "Instructor user id cannot be null")
     private Long instructorUserId;
 

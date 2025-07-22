@@ -12,9 +12,7 @@ export const makeStore = () => configureStore({
     // and other useful features of RTK Query.
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({
-            serializableCheck: {
-                ignoredActions: [],
-            },
+            serializableCheck: false,
         }).concat(apiSlice.middleware),
     devTools: process.env.NODE_ENV !== 'production',
 });

@@ -1,24 +1,14 @@
 // webapp/src/lib/features/api/apiSlice.ts
+import { ActivityCreateDTO, ActivityResponseDTO, Lesson, LessonCreateDTO, LessonResponseDTO, ProposedTimeSlot, ProposedTimeSlotResponseDTO, ScheduledLessonCreateDTO, ScheduledLessonResponseDTO, SummaryResponseDTO, UserResponseDTO, WorkshopCreateDTO, WorkshopResponseDTO } from '@/app/interfaces/api'; // Adjust path as needed
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { ScheduledLesson, ProposedTimeSlot, Lesson, ProposedTimeSlotResponseDTO, SummaryResponseDTO, WorkshopResponseDTO, ActivityResponseDTO, WorkshopCreateDTO, ActivityCreateDTO } from '@/app/interfaces/api'; // Adjust path as needed
 
 export const apiSlice = createApi({
     reducerPath: 'api', // Unique name for the slice in the Redux store
     baseQuery: fetchBaseQuery({
         baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080',
     }),
-    tagTypes: ['ScheduledLesson', 'Lesson', 'ProposedTimeSlot', 'Vote', 'Summary', 'Workshop', 'Activity'],
+    tagTypes: ['ScheduledLesson', 'Lesson', 'ProposedTimeSlot', 'Vote', 'Summary', 'Workshop', 'Activity', 'User'],
     endpoints: (builder) => ({
-        getScheduledLessonById: builder.query<ScheduledLesson, string>({
-            query: (id) => `/api/scheduled-lessons/${id}`,
-            providesTags: (result, error, id) => [{ type: 'ScheduledLesson', id }],
-        }),
-
-        getLessonById: builder.query<Lesson, string>({
-            query: (id) => `/api/lessons/${id}`,
-            providesTags: (result, error, id) => [{ type: 'Lesson', id }],
-        }),
-
         getProposedTimeSlotById: builder.query<ProposedTimeSlot, string>({
             query: (id) => `/api/proposed-time-slots/${id}`,
             providesTags: (result, error, id) => [{ type: 'ProposedTimeSlot', id }],
@@ -32,6 +22,89 @@ export const apiSlice = createApi({
         getOverallSummary: builder.query<SummaryResponseDTO, void>({
             query: () => '/api/summary',
             providesTags: ['Summary'], // Tag for caching
+        }),
+
+        getUsers: builder.query<UserResponseDTO[], void>({
+            query: () => '/api/users',
+            providesTags: ['User'], // Tag for caching
+        }),
+
+        /**
+        * ------------------------------------------------------------ Scheduled Lesson ------------------------------------------------------------
+        */
+        getScheduledLessons: builder.query<ScheduledLessonResponseDTO[], void>({
+            query: () => '/api/scheduled-lessons',
+            providesTags: ['ScheduledLesson'], // Tag for caching
+        }),
+
+        getScheduledLessonById: builder.query<ScheduledLessonResponseDTO, string>({
+            query: (id) => `/api/scheduled-lessons/${id}`,
+            providesTags: (result, error, id) => [{ type: 'ScheduledLesson', id }],
+        }),
+
+        createScheduledLesson: builder.mutation<ScheduledLessonResponseDTO, Omit<ScheduledLessonCreateDTO, 'id'>>({
+            query: (newScheduledLesson) => ({
+                url: '/api/scheduled-lessons',
+                method: 'POST',
+                body: newScheduledLesson,
+            }),
+            invalidatesTags: ['ScheduledLesson', 'Summary'],
+        }),
+
+        updateScheduledLesson: builder.mutation<ScheduledLessonResponseDTO, ScheduledLessonCreateDTO>({ // ScheduledLesson includes id
+            query: ({ id, ...patch }) => ({
+                url: `/api/scheduled-lessons/${id}`,
+                method: 'PATCH', // Or PATCH depending on your API
+                body: patch,
+            }),
+            invalidatesTags: (result, error, { id }) => ['ScheduledLesson', { type: 'ScheduledLesson', id }, 'Workshop'],
+        }),
+
+        deleteScheduledLesson: builder.mutation<void, string>({ // Pass id as string
+            query: (id) => ({
+                url: `/api/scheduled-lessons/${id}`,
+                method: 'DELETE',
+            }),
+            invalidatesTags: (result, error, id) => ['ScheduledLesson', { type: 'ScheduledLesson', id }, 'Workshop'],
+        }),
+
+        /**
+         * ------------------------------------------------------------ Lesson ------------------------------------------------------------
+         */
+        getLessons: builder.query<LessonResponseDTO[], void>({
+            query: () => '/api/lessons',
+            providesTags: ['Lesson'], // Tag for caching
+        }),
+
+        getLessonById: builder.query<Lesson, string>({
+            query: (id) => `/api/lessons/${id}`,
+            providesTags: (result, error, id) => [{ type: 'Lesson', id }],
+        }),
+
+        createLesson: builder.mutation<LessonResponseDTO, Omit<LessonCreateDTO, 'id'>>({
+            query: (newLesson) => ({
+                url: '/api/lessons',
+                method: 'POST',
+                body: newLesson,
+            }),
+            invalidatesTags: ['Lesson', 'Summary'],
+        }),
+
+        updateLesson: builder.mutation<LessonResponseDTO, LessonCreateDTO>({ // Lesson includes id
+            query: ({ id, ...patch }) => ({
+                url: `/api/lessons/${id}`,
+                method: 'PATCH', // Or PATCH depending on your API
+                body: patch,
+            }),
+            invalidatesTags: (result, error, { id }) => ['Lesson', { type: 'Lesson', id }, 'Workshop'],
+        }),
+
+        deleteLesson: builder.mutation<void, string>({ // Pass id as string
+            query: (id) => ({
+                url: `/api/lessons/${id}`,
+                method: 'DELETE',
+            }),
+            invalidatesTags: (result, error, id) => ['Lesson', { type: 'Lesson', id }, 'Workshop'],
         }),
 
         /**
@@ -85,7 +158,7 @@ export const apiSlice = createApi({
             providesTags: ['Activity'], // Define a new tag type if needed
         }),
 
-        createActivity: builder.mutation<ActivityResponseDTO, Omit<ActivityCreateDTO, 'id'>>({ 
+        createActivity: builder.mutation<ActivityResponseDTO, Omit<ActivityCreateDTO, 'id'>>({
             query: (newActivity) => ({
                 url: '/api/activities',
                 method: 'POST',
@@ -121,16 +194,33 @@ export const apiSlice = createApi({
 
 // Export the auto-generated hooks
 export const {
-    useGetScheduledLessonByIdQuery,
-    useGetLessonByIdQuery,
     useGetProposedTimeSlotByIdQuery,
     useGetVotesForProposedTimeSlotQuery,
     useGetOverallSummaryQuery,
+    useGetUsersQuery,
+
+    // Lesson
+    useGetLessonByIdQuery,
+    useGetLessonsQuery,
+    useUpdateLessonMutation,
+    useDeleteLessonMutation,
+    useCreateLessonMutation,
+
+    // Scheduled lesson
+    useGetScheduledLessonByIdQuery,
+    useGetScheduledLessonsQuery,
+    useUpdateScheduledLessonMutation,
+    useDeleteScheduledLessonMutation,
+    useCreateScheduledLessonMutation,
+
+    // Workshop
     useGetWorkshopsQuery,
     useCreateWorkshopMutation,
     useGetWorkshopByIdQuery,
     useUpdateWorkshopMutation,
     useDeleteWorkshopMutation,
+
+    // Activity
     useGetActivitiesQuery,
     useCreateActivityMutation,
     useGetActivityByIdQuery,

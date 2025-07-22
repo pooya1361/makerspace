@@ -1,61 +1,61 @@
-// webapp/src/app/activities/[id]/edit/ActivityEditForm.tsx or a new path like /components/ActivityForm.tsx
+// webapp/src/app/Lessons/[id]/edit/LessonEditForm.tsx or a new path like /components/LessonForm.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
-    useUpdateActivityMutation,
-    useDeleteActivityMutation,
-    useGetWorkshopsQuery,
-    useCreateActivityMutation, // <-- NEW: Add mutation hook
+    useUpdateLessonMutation,
+    useDeleteLessonMutation,
+    useGetActivitiesQuery,
+    useCreateLessonMutation, // <-- NEW: Add mutation hook
 } from '@/app/lib/features/api/apiSlice';
-import { revalidateActivitiesPath } from '@/app/actions';
-import { ActivityResponseDTO } from '@/app/interfaces/api';
-import { ActivityCreateDTO } from '@/app/interfaces/api'; // Assuming you have this for add operations
+import { revalidateLessonsPath } from '@/app/actions';
+import { LessonResponseDTO } from '@/app/interfaces/api';
+import { LessonCreateDTO } from '@/app/interfaces/api'; // Assuming you have this for add operations
 
 // Type definition for the component's props
-type ActivityFormProps = {
-    initialActivity?: ActivityResponseDTO; // Make initialActivity optional for "add" mode
+type LessonFormProps = {
+    initialLesson?: LessonResponseDTO; // Make initialLesson optional for "add" mode
 };
 
-export default function ActivityForm({ initialActivity }: ActivityFormProps) {
+export default function LessonForm({ initialLesson }: LessonFormProps) {
     const router = useRouter();
 
     // Determine if we are in "edit" mode or "add" mode
-    const isEditMode = initialActivity !== undefined;
+    const isEditMode = initialLesson !== undefined;
 
     // Initialize state based on mode
-    const [name, setName] = useState(initialActivity?.name || '');
-    const [description, setDescription] = useState(initialActivity?.description || '');
-    const [workshopId, setWorkshopId] = useState<number | null>(
-        initialActivity?.workshop?.id ?? null // Use nullish coalescing for cleaner default
+    const [name, setName] = useState(initialLesson?.name || '');
+    const [description, setDescription] = useState(initialLesson?.description || '');
+    const [activityId, setActivityId] = useState<number | null>(
+        initialLesson?.activity?.id ?? null // Use nullish coalescing for cleaner default
     );
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
 
     // Conditional RTK Query mutations
-    const [updateActivity, { isLoading: isUpdating }] = useUpdateActivityMutation();
-    const [deleteActivity, { isLoading: isDeleting }] = useDeleteActivityMutation();
-    const [addActivity, { isLoading: isAdding }] = useCreateActivityMutation(); // <-- NEW: Add mutation
+    const [updateLesson, { isLoading: isUpdating }] = useUpdateLessonMutation();
+    const [deleteLesson, { isLoading: isDeleting }] = useDeleteLessonMutation();
+    const [addLesson, { isLoading: isAdding }] = useCreateLessonMutation(); // <-- NEW: Add mutation
 
-    const { data: workshops, isLoading: isLoadingWorkshops } = useGetWorkshopsQuery();
+    const { data: activities, isLoading: isLoadingActivities } = useGetActivitiesQuery();
 
     const isFormLoading = isUpdating || isDeleting || isAdding; // Include isAdding
 
-    // Optional: Update form state if initialActivity changes (e.g., from a different edit link)
+    // Optional: Update form state if initialLesson changes (e.g., from a different edit link)
     // This useEffect ensures that if the component is reused for a *different* edit item
     // without remounting, the form fields update.
     useEffect(() => {
-        setName(initialActivity?.name || '');
-        setDescription(initialActivity?.description || '');
-        setWorkshopId(initialActivity?.workshop?.id ?? null);
-    }, [initialActivity]);
+        setName(initialLesson?.name || '');
+        setDescription(initialLesson?.description || '');
+        setActivityId(initialLesson?.activity?.id ?? null);
+    }, [initialLesson]);
 
-    const handleWorkshopChange = (value: string) => {
+    const handleActivityChange = (value: string) => {
         // Convert string to number, if empty string, set to null
-        const id = value ? Number(value) : null;
-        setWorkshopId(id);
+        const id = value === "-1" ? Number(value) : null;
+        setActivityId(id);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -64,37 +64,37 @@ export default function ActivityForm({ initialActivity }: ActivityFormProps) {
         setSuccessMessage('');
 
         if (!name.trim()) {
-            setErrorMessage('Activity Name is required.'); // Be more specific
+            setErrorMessage('Lesson Name is required.'); // Be more specific
             return;
         }
 
         try {
             if (isEditMode) {
                 // --- EDIT LOGIC ---
-                await updateActivity({
-                    id: initialActivity!.id, // 'id' is guaranteed in edit mode
+                await updateLesson({
+                    id: initialLesson!.id, // 'id' is guaranteed in edit mode
                     name,
                     description,
-                    workshopId: workshopId as unknown as number,
+                    activityId: activityId as unknown as number,
                 }).unwrap();
-                setSuccessMessage('Activity updated successfully!');
+                setSuccessMessage('Lesson updated successfully!');
             } else {
                 // --- ADD LOGIC ---
-                const newActivity: ActivityCreateDTO = {
+                const newLesson: LessonCreateDTO = {
                     id: -1,
                     name,
                     description,
-                    workshopId: workshopId as unknown as number,
+                    activityId: activityId as unknown as number,
                 };
-                await addActivity(newActivity).unwrap();
-                setSuccessMessage('Activity added successfully!');
+                await addLesson(newLesson).unwrap();
+                setSuccessMessage('Lesson added successfully!');
             }
 
-            await revalidateActivitiesPath();
-            router.push('/activities'); // Replace history entry
+            await revalidateLessonsPath();
+            router.push('/lessons');
 
         } catch (err: any) { // Consider type narrowing here, as discussed previously
-            console.error(`Failed to ${isEditMode ? 'update' : 'add'} activity:`, err);
+            console.error(`Failed to ${isEditMode ? 'update' : 'add'} Lesson:`, err);
             if (err.data && err.data.message) {
                 setErrorMessage(err.data.message);
             } else if (err.error) {
@@ -106,17 +106,17 @@ export default function ActivityForm({ initialActivity }: ActivityFormProps) {
     };
 
     const handleDelete = async () => {
-        if (!initialActivity || !window.confirm(`Are you sure you want to delete activity "${initialActivity.name}"?`)) {
+        if (!initialLesson || !window.confirm(`Are you sure you want to delete Lesson "${initialLesson.name}"?`)) {
             return;
         }
 
         try {
-            await deleteActivity(initialActivity.id.toString()).unwrap();
-            setSuccessMessage('Activity deleted successfully!');
-            await revalidateActivitiesPath();
-            router.push('/activities');
+            await deleteLesson(initialLesson.id.toString()).unwrap();
+            setSuccessMessage('Lesson deleted successfully!');
+            await revalidateLessonsPath();
+            router.push('/lessons');
         } catch (err: any) { // Consider type narrowing
-            console.error('Failed to delete activity:', err);
+            console.error('Failed to delete Lesson:', err);
             if (err.data && err.data.message) {
                 setErrorMessage(err.data.message);
             } else if (err.error) {
@@ -130,7 +130,7 @@ export default function ActivityForm({ initialActivity }: ActivityFormProps) {
     return (
         <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-lg">
             <h2 className="text-2xl font-bold mb-6 text-center">
-                {isEditMode ? 'Edit Activity' : 'Add New Activity'}
+                {isEditMode ? 'Edit Lesson' : 'Add New Lesson'}
             </h2>
             {errorMessage && (
                 <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
@@ -148,7 +148,7 @@ export default function ActivityForm({ initialActivity }: ActivityFormProps) {
             <form onSubmit={handleSubmit}>
                 <div className="mb-4">
                     <label htmlFor="name" className="block text-gray-700 text-sm font-bold mb-2">
-                        Activity Name:
+                        Lesson Name:
                     </label>
                     <input
                         type="text"
@@ -176,21 +176,21 @@ export default function ActivityForm({ initialActivity }: ActivityFormProps) {
 
                 <div className="mb-6">
                     <label className="block text-gray-700 text-sm font-bold mb-2">
-                        Workshop:
+                        Activity:
                     </label>
-                    {isLoadingWorkshops ? (
-                        <p>Loading workshops...</p>
+                    {isLoadingActivities ? (
+                        <p>Loading activities...</p>
                     ) : (
                         <>
-                            {workshops && workshops.length > 0 ? ( // Check for workshops existence and length
+                            {activities && activities.length > 0 ? ( // Check for activities existence and length
                                 <select
-                                    id="workshops"
-                                    onChange={(e) => handleWorkshopChange(e.target.value)}
+                                    id="activities"
+                                    onChange={(e) => handleActivityChange(e.target.value)}
                                     className="border text-gray-700 text-sm rounded-lg block w-full p-2.5"
-                                    value={workshopId ?? ''} // Use empty string for null/undefined to select default option
+                                    value={activityId ?? ''} // Use empty string for null/undefined to select default option
                                 >
-                                    <option value="undefined">-- Select a Workshop (Optional) --</option> {/* Added a placeholder option */}
-                                    {workshops.map(workshop => (
+                                    <option value={-1}>-- Select a Activity (Optional) --</option> {/* Added a placeholder option */}
+                                    {activities.map(workshop => (
                                         <option key={workshop.id} value={workshop.id}>
                                             {workshop.name}
                                         </option>
@@ -224,7 +224,7 @@ export default function ActivityForm({ initialActivity }: ActivityFormProps) {
                         )}
                     </div>
                     <Link
-                        href="/activities"
+                        href="/Lessons"
                         className="inline-block align-baseline font-bold text-sm text-blue-600 hover:text-blue-800 "
                     >
                         Cancel

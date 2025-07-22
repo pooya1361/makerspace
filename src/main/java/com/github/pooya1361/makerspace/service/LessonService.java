@@ -30,11 +30,14 @@ public class LessonService {
 
     @Transactional
     public LessonResponseDTO createLesson(LessonCreateDTO createDTO) {
-        Activity activity = activityRepository.findById(createDTO.getActivityId())
-                .orElseThrow(() -> new EntityNotFoundException("Activity not found with ID: " + createDTO.getActivityId()));
-
         Lesson lesson = lessonMapper.toEntity(createDTO);
-        lesson.setActivity(activity);
+
+        if (createDTO.getActivityId() != null) {
+            Activity activity = activityRepository.findById(createDTO.getActivityId())
+                    .orElseThrow(() -> new EntityNotFoundException("Activity not found with ID: " + createDTO.getActivityId()));
+            lesson.setActivity(activity);
+        }
+
         Lesson savedLesson = lessonRepository.save(lesson);
         return lessonMapper.toDto(savedLesson);
     }
@@ -55,6 +58,7 @@ public class LessonService {
 
         lessonMapper.updateLessonFromDto(updateDTO, existingLesson);
 
+        existingLesson.setActivity(null);
         if (updateDTO.getActivityId() != null) {
             Activity newActivity = activityRepository.findById(updateDTO.getActivityId())
                     .orElseThrow(() -> new EntityNotFoundException("Activity not found with ID: " + updateDTO.getActivityId()));

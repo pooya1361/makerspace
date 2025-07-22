@@ -6,7 +6,7 @@ import { notFound } from 'next/navigation'; // Import notFound for 404 handling
 // No need to import useParams from 'next/navigation' as it's passed as a prop
 // No need to import useEffect or useState for Server Components
 
-import { ProposedTimeSlot, ProposedTimeSlotSummaryDTO, ScheduledLesson, ScheduledLessonResponseDTO } from '@/app/interfaces/api'; // Assuming @types maps to this path
+import { ProposedTimeSlotSummaryDTO, ScheduledLessonResponseDTO } from '@/app/interfaces/api'; // Assuming @types maps to this path
 import moment from 'moment';
 
 // Define the props for this page component (dynamic segment 'id')

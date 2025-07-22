@@ -12,9 +12,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProposedTimeSlotCreateDTO {
+    private Long id;
     @NotNull(message = "Start time cannot be null")
     private LocalDateTime proposedStartTime;
-
     @NotNull(message = "Scheduled lesson cannot be null")
     private Long scheduledLessonId;
 

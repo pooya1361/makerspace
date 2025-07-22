@@ -10,3 +10,7 @@ export async function revalidateWorkshopsPath() {
 export async function revalidateActivitiesPath() {
     revalidatePath('/activities');
 }
+
+export async function revalidateLessonsPath() {
+    revalidatePath('/lessons');
+}

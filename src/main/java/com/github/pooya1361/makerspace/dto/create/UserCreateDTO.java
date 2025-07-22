@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserCreateDTO {
+    private Long id;
     @NotNull(message = "Username cannot be null")
     private String username;
     @NotNull(message = "Password cannot be null")

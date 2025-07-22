@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LessonCreateDTO {
+    private Long id;
     private String name;
     private String description;
     private Long activityId;
