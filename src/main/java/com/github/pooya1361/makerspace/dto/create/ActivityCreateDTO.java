@@ -11,6 +11,7 @@ import java.util.Optional;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ActivityCreateDTO {
+    private Long id;
     @NotNull(message = "Name cannot be null")
     private String name;
     private String description;

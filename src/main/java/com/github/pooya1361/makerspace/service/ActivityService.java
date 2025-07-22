@@ -61,6 +61,8 @@ public class ActivityService {
             Workshop newWorkshop = workshopRepository.findById(activityCreateDTO.getWorkshopId())
                     .orElseThrow(() -> new EntityNotFoundException("Workshop not found with ID: " + activityCreateDTO.getWorkshopId()));
             existingActivity.setWorkshop(newWorkshop);
+        } else {
+            existingActivity.setWorkshop(null);
         }
 
         Activity updatedActivity = activityRepository.save(existingActivity);

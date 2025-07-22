@@ -1,8 +1,9 @@
 /* tslint:disable */
 /* eslint-disable */
-// Generated using typescript-generator version 3.2.1263 on 2025-07-21 14:23:29.
+// Generated using typescript-generator version 3.2.1263 on 2025-07-22 10:08:52.
 
 export interface ActivityCreateDTO {
+    id: number;
     name: string;
     description: string;
     workshopId: number;
@@ -80,6 +81,7 @@ export interface SummaryResponseDTO {
     totalActivities: number;
     totalLessons: number;
     totalScheduledLessons: number;
+    totalUsers: number;
 }
 
 export interface UserResponseDTO {

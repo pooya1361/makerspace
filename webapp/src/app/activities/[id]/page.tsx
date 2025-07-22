@@ -64,36 +64,14 @@ export default async function ActivityDetailsPage({ params: paramsPromise }: Act
         <div className="container mx-auto p-6 md:p-10 bg-white shadow-lg rounded-lg mt-8 mb-12">
             <h1 className="text-4xl font-bold text-green-800 mb-6 text-center">{activity.name}</h1>
 
-            {/* If you have an image for the activity */}
-            {/* {activity.imageUrl && (
-        <div className="mb-6">
-          <img src={activity.imageUrl} alt={activity.name} className="w-full h-96 object-cover rounded-lg" />
-        </div>
-      )} */}
-
             <p className="text-lg text-gray-700 leading-relaxed mb-8">
                 {activity.description}
             </p>
-
-            {/* Add more activity details here as needed */}
-            {/* Example:
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-        <div>
-          <h3 className="text-xl font-semibold text-gray-800">Duration:</h3>
-          <p className="text-gray-600">{activity.durationInMinutes} minutes</p>
-        </div>
-        <div>
-          <h3 className="text-xl font-semibold text-gray-800">Instructor:</h3>
-          <p className="text-gray-600">{activity.instructorName}</p>
-        </div>
-      </div>
-      */}
 
             <div className="mt-10 text-center">
                 <Link href="/activities" className="inline-block bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition duration-300 text-lg">
                     &larr; Back to All Activities
                 </Link>
-                {/* You might add other buttons here, e.g., "Sign Up" */}
             </div>
         </div>
     );

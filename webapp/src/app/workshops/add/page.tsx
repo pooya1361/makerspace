@@ -4,9 +4,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation'; // Correct import for useRouter in App Router
 import Link from 'next/link';
-import { apiSlice, useCreateWorkshopMutation } from '@/app/lib/features/api/apiSlice';
+import { useCreateWorkshopMutation } from '@/app/lib/features/api/apiSlice';
 import { revalidateWorkshopsPath } from '@/app/actions';
-import { store } from '@/app/lib/store';
 
 export default function AddWorkshopPage() {
     const router = useRouter();

@@ -1,5 +1,5 @@
 import { apiSlice } from '@/app/lib/features/api/apiSlice';
-import { store } from '@/app/lib/store';
+import { makeStore } from '@/app/lib/store';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { VoteSummaryDTO } from '@/app/interfaces/api'; // Your generated types
@@ -17,7 +17,7 @@ export default async function ProposedTimeSlotVotesPage({ params: paramsPromise,
     const scheduledLessonId = searchParams.scheduledLessonId;
 
 
-    const { data: proposedTimeSlot, isError, error } = await store.dispatch(
+    const { data: proposedTimeSlot, isError, error } = await makeStore().dispatch(
         apiSlice.endpoints.getVotesForProposedTimeSlot.initiate(proposedTimeSlotId)
     );
 

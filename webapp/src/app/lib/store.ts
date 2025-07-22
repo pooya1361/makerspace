@@ -1,8 +1,9 @@
 // webapp/src/lib/store.ts
 import { configureStore } from '@reduxjs/toolkit';
 import { apiSlice } from './features/api/apiSlice';
+import { createWrapper } from 'next-redux-wrapper'
 
-export const store = configureStore({
+export const makeStore = () => configureStore({
     reducer: {
         // Add the generated API reducer to the store
         [apiSlice.reducerPath]: apiSlice.reducer,
@@ -10,10 +11,18 @@ export const store = configureStore({
     // Adding the api middleware enables caching, invalidation, polling,
     // and other useful features of RTK Query.
     middleware: (getDefaultMiddleware) =>
-        getDefaultMiddleware().concat(apiSlice.middleware),
+        getDefaultMiddleware({
+            serializableCheck: {
+                ignoredActions: [],
+            },
+        }).concat(apiSlice.middleware),
+    devTools: process.env.NODE_ENV !== 'production',
 });
 
-// Infer the `RootState` and `AppDispatch` types from the store itself
-export type RootState = ReturnType<typeof store.getState>;
-// Inferred type: {posts: PostsState, comments: CommentsState, users: UsersState}
-export type AppDispatch = typeof store.dispatch;
+export type AppStore = ReturnType<typeof makeStore>;
+export type RootState = ReturnType<AppStore['getState']>;
+export type AppDispatch = AppStore['dispatch'];
+
+export const wrapper = createWrapper(makeStore, { debug: false });
+
+export const store = makeStore();

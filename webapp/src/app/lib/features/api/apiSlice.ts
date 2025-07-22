@@ -1,6 +1,6 @@
 // webapp/src/lib/features/api/apiSlice.ts
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { ScheduledLesson, ProposedTimeSlot, Lesson, ProposedTimeSlotResponseDTO, SummaryResponseDTO, WorkshopResponseDTO, Workshop, ActivityResponseDTO, WorkshopCreateDTO } from '@/app/interfaces/api'; // Adjust path as needed
+import { ScheduledLesson, ProposedTimeSlot, Lesson, ProposedTimeSlotResponseDTO, SummaryResponseDTO, WorkshopResponseDTO, ActivityResponseDTO, WorkshopCreateDTO, ActivityCreateDTO } from '@/app/interfaces/api'; // Adjust path as needed
 
 export const apiSlice = createApi({
     reducerPath: 'api', // Unique name for the slice in the Redux store
@@ -34,6 +34,9 @@ export const apiSlice = createApi({
             providesTags: ['Summary'], // Tag for caching
         }),
 
+        /**
+         * ------------------------------------------------------------ Workshop ------------------------------------------------------------
+         */
         getWorkshops: builder.query<WorkshopResponseDTO[], void>({
             query: () => '/api/workshops',
             providesTags: ['Workshop'], // Tag for caching
@@ -74,10 +77,45 @@ export const apiSlice = createApi({
             invalidatesTags: (result, error, id) => ['Workshop', { type: 'Workshop', id }, 'Activity'],
         }),
 
+        /**
+         * ------------------------------------------------------------ Activity ------------------------------------------------------------
+         */
         getActivities: builder.query<ActivityResponseDTO[], void>({
             query: () => '/api/activities', // Adjust to your actual API endpoint
             providesTags: ['Activity'], // Define a new tag type if needed
         }),
+
+        createActivity: builder.mutation<ActivityResponseDTO, Omit<ActivityCreateDTO, 'id'>>({ 
+            query: (newActivity) => ({
+                url: '/api/activities',
+                method: 'POST',
+                body: newActivity,
+            }),
+            invalidatesTags: ['Activity', 'Summary'],
+        }),
+
+        getActivityById: builder.query<ActivityResponseDTO, string>({
+            query: (id) => `/api/activities/${id}`,
+            providesTags: (result, error, id) => [{ type: 'Activity', id }],
+        }),
+
+        updateActivity: builder.mutation<ActivityResponseDTO, ActivityCreateDTO>({ // Activity includes id
+            query: ({ id, ...patch }) => ({
+                url: `/api/activities/${id}`,
+                method: 'PATCH', // Or PATCH depending on your API
+                body: patch,
+            }),
+            invalidatesTags: (result, error, { id }) => ['Activity', { type: 'Activity', id }, 'Workshop'],
+        }),
+
+        deleteActivity: builder.mutation<void, string>({ // Pass id as string
+            query: (id) => ({
+                url: `/api/activities/${id}`,
+                method: 'DELETE',
+            }),
+            invalidatesTags: (result, error, id) => ['Activity', { type: 'Activity', id }, 'Workshop'],
+        }),
+
     }),
 });
 
@@ -93,5 +131,9 @@ export const {
     useGetWorkshopByIdQuery,
     useUpdateWorkshopMutation,
     useDeleteWorkshopMutation,
-    useGetActivitiesQuery
+    useGetActivitiesQuery,
+    useCreateActivityMutation,
+    useGetActivityByIdQuery,
+    useUpdateActivityMutation,
+    useDeleteActivityMutation,
 } = apiSlice;

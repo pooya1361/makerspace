@@ -2,7 +2,7 @@
 // This is a Server Component for fetching and displaying single lesson details.
 
 import { apiSlice } from '@/app/lib/features/api/apiSlice';
-import { store } from '@/app/lib/store';
+import { makeStore } from '@/app/lib/store';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -19,7 +19,7 @@ export default async function LessonDetailsPage({ params: paramsPromise }: Lesso
     const params = await paramsPromise;
     const { id: lessonId } = params;
 
-    const { data: lesson, isError, error } = await store.dispatch(
+    const { data: lesson, isError, error } = await makeStore().dispatch(
         apiSlice.endpoints.getLessonById.initiate(lessonId)
     );
 

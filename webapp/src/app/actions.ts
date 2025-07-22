@@ -6,3 +6,7 @@ import { revalidatePath } from 'next/cache';
 export async function revalidateWorkshopsPath() {
     revalidatePath('/workshops');
 }
+
+export async function revalidateActivitiesPath() {
+    revalidatePath('/activities');
+}

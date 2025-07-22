@@ -1,7 +1,7 @@
 // webapp/src/app/workshops/[id]/edit/page.tsx
 // This is a Server Component - NO 'use client' at the top
 
-import { store } from '@/app/lib/store';
+import { makeStore } from '@/app/lib/store';
 import { apiSlice } from '@/app/lib/features/api/apiSlice';
 import { notFound } from 'next/navigation'; // For handling workshop not found
 import WorkshopEditForm from './WorkshopEditForm';
@@ -17,7 +17,7 @@ export default async function EditWorkshopPage({ params: paramPromise }: EditWor
     const workshopId = params.id;
 
     // Fetch the workshop data on the server
-    const { data: workshop, isError, error } = await store.dispatch(
+    const { data: workshop, isError, error } = await makeStore().dispatch(
         apiSlice.endpoints.getWorkshopById.initiate(workshopId)
     );
 

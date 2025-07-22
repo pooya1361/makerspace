@@ -1,27 +1,9 @@
 import { apiSlice } from "./lib/features/api/apiSlice"
-import { store } from "./lib/store"
-
-type User = {
-  id: number
-  username: string
-  email: string
-  userType: string
-}
-
-async function getUsers() {
-  // You can use a direct fetch call here
-  const res = await fetch('http://localhost:8080/api/users'); // Disable cache for dev
-
-  if (!res.ok) {
-    throw new Error('Failed to fetch data');
-  }
-  const data = await res.json();
-  return data;
-}
+import { makeStore } from "./lib/store"
 
 export default async function Home() {
     // Fetch summary data using RTK Query on the server
-    const { data: summary, isError: summaryError, error: summaryErrorDetails } = await store.dispatch(
+    const { data: summary, isError: summaryError, error: summaryErrorDetails } = await makeStore().dispatch(
         apiSlice.endpoints.getOverallSummary.initiate(undefined)
     );
 
@@ -53,6 +35,10 @@ export default async function Home() {
               <div className="bg-white p-4 rounded-lg shadow-sm">
                 <p className="text-4xl font-bold text-blue-700">{summary.totalScheduledLessons}</p>
                 <p className="text-gray-600">Scheduled Lessons</p>
+              </div>
+              <div className="bg-white p-4 rounded-lg shadow-sm">
+                <p className="text-4xl font-bold text-blue-700">{summary.totalUsers}</p>
+                <p className="text-gray-600">Makers</p>
               </div>
             </div>
           </div>

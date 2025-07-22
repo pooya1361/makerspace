@@ -1,7 +1,7 @@
 // webapp/src/app/workshops/[id]/edit/WorkshopEditForm.tsx
 'use client'; // This must be a Client Component
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -64,7 +64,6 @@ export default function WorkshopEditForm({ initialWorkshop }: WorkshopEditFormPr
         }
 
         try {
-            // Call the RTK Query mutation to update the workshop
             await updateWorkshop({
                 id: initialWorkshop.id,
                 name,
@@ -75,22 +74,15 @@ export default function WorkshopEditForm({ initialWorkshop }: WorkshopEditFormPr
 
             setSuccessMessage('Workshop updated successfully!');
 
-            // Revalidate the /workshops path to show the updated list
             await revalidateWorkshopsPath();
 
-            // Invalidate the cache for the specific workshop detail page (if you have one)
-            // This requires another Server Action if that page is a Server Component
-            // Example: await revalidateWorkshopDetailPath(initialWorkshop.id.toString());
-
-            // Navigate back to the workshops list page, forcing a refresh
-            router.push(`/workshops?refresh=true`);
-            router.replace('/workshops');
+            router.push('/workshops');
 
         } catch (err: any) {
             console.error('Failed to update workshop:', err);
-            if (err.data && err.data.message) {
+            if ('data' in err && err.data?.message) {
                 setErrorMessage(err.data.message);
-            } else if (err.error) {
+            } else if ('error' in err) {
                 setErrorMessage(err.error);
             } else {
                 setErrorMessage('An unexpected error occurred. Please try again.');
@@ -126,7 +118,11 @@ export default function WorkshopEditForm({ initialWorkshop }: WorkshopEditFormPr
         }
     };
 
-    const availableActivities = () => activities?.filter(ac => ac.workshop == null || ac.workshop == undefined || (ac.workshop && ac.workshop.id == initialWorkshop.id)) || []
+    const filteredActivities = useMemo(() => {
+        return activities?.filter(ac =>
+            !ac.workshop || ac.workshop.id === initialWorkshop.id
+        ) || [];
+    }, [activities, initialWorkshop.id]);
 
     return (
         <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-lg">
@@ -196,9 +192,9 @@ export default function WorkshopEditForm({ initialWorkshop }: WorkshopEditFormPr
                     {isLoadingActivities ? (
                         <p>Loading activities...</p>
                     ) : (
-                        availableActivities().length > 0 ?
+                        filteredActivities.length > 0 ?
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                                {availableActivities().map(activity => (
+                                {filteredActivities.map(activity => (
                                     <label key={activity.id} className="inline-flex items-center">
                                         <input
                                             type="checkbox"

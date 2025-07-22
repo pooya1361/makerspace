@@ -13,5 +13,5 @@ public class SummaryResponseDTO {
     private long totalActivities;
     private long totalLessons;
     private long totalScheduledLessons;
-    // Add more counts if needed, e.g., totalUsers, totalVotes
+    private long totalUsers;
 }
