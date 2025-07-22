@@ -4,7 +4,7 @@
 import { makeStore } from '@/app/lib/store';
 import { apiSlice } from '@/app/lib/features/api/apiSlice';
 import { notFound } from 'next/navigation'; // For handling workshop not found
-import ActivityEditForm from './ActivityEditForm';
+import ActivityForm from '@/app/components/ActivityForm';
 
 type EditActivityPageProps = {
     params: {
@@ -31,8 +31,7 @@ export default async function EditActivityPage({ params: paramPromise }: EditAct
     return (
         <div className="container mx-auto p-6 md:p-10">
             <h1 className="text-4xl font-bold text-blue-800 mb-8 text-center">Edit Activity</h1>
-            {/* Pass the fetched activity data as a prop to the Client Component */}
-            <ActivityEditForm initialActivity={activity} />
+            <ActivityForm initialActivity={activity} />
         </div>
     );
 }

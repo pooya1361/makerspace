@@ -16,6 +16,7 @@ public interface ActivityMapper {
     List<ActivityResponseDTO> toDtoList(List<Activity> activities);
 
     @Mapping(target = "workshop", ignore = true)
+    @Mapping(target = "id", ignore = true)
     Activity toEntity(ActivityCreateDTO activityCreateDTO);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

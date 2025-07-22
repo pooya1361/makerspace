@@ -12,7 +12,7 @@ export default async function ActivitiesPage() {
     return (
         <div className="container mx-auto p-6 md:p-10">
             <div className="flex justify-between items-center mb-10">
-                <h1 className="text-4xl font-bold text-green-800">Activities</h1>
+                <h1 className="text-4xl font-bold text-green-700">Activities</h1>
                 <Link href="/activities/add" className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
                     + Add Activity
                 </Link>
