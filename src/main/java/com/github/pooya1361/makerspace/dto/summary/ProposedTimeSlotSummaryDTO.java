@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -15,6 +16,6 @@ import java.util.Set;
 @AllArgsConstructor
 public class ProposedTimeSlotSummaryDTO {
     private Long id;
-    private LocalDateTime proposedStartTime;
+    private OffsetDateTime proposedStartTime;
     private List<VoteSummaryDTO> votes;
 }

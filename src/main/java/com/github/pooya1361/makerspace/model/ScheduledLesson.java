@@ -8,6 +8,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.Set;
 import java.util.HashSet;
@@ -25,7 +26,7 @@ public class ScheduledLesson {
 
     @Column(name = "start_time")
     @JsonProperty(required = false)
-    private Optional<LocalDateTime> startTime;
+    private Optional<OffsetDateTime> startTime;
 
     @Column(name = "duration_in_minutes", nullable = false)
     private Long durationInMinutes;

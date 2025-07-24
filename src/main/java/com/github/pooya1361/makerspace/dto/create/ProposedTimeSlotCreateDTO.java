@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Data
 @NoArgsConstructor
@@ -14,7 +15,7 @@ import java.time.LocalDateTime;
 public class ProposedTimeSlotCreateDTO {
     private Long id;
     @NotNull(message = "Start time cannot be null")
-    private LocalDateTime proposedStartTime;
+    private OffsetDateTime proposedStartTime;
     @NotNull(message = "Scheduled lesson cannot be null")
     private Long scheduledLessonId;
 

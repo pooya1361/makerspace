@@ -7,14 +7,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.util.Optional;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class ScheduledLessonCreateDTO {
     private Long id;
-    private LocalDateTime startTime;
+    private Optional<OffsetDateTime> startTime;
     private Long durationInMinutes;
     @NotNull(message = "Lesson id cannot be null")
     private Long lessonId;

@@ -8,6 +8,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -23,7 +24,7 @@ public class ProposedTimeSlot {
     private Long id;
 
     @Column(name = "proposed_start_time", nullable = false)
-    private LocalDateTime proposedStartTime;
+    private OffsetDateTime proposedStartTime;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "scheduled_lesson_id", nullable = false)

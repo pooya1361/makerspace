@@ -6,7 +6,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Data
 @NoArgsConstructor
@@ -14,7 +16,7 @@ import java.util.List;
 public class ScheduledLessonResponseDTO {
 
     private Long id;
-    private LocalDateTime startTime;
+    private Optional<OffsetDateTime> startTime;
     private Long durationInMinutes;
     private LessonResponseDTO lesson;
     private UserResponseDTO instructor;
