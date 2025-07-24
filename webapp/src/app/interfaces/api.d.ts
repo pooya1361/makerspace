@@ -1,6 +1,6 @@
 /* tslint:disable */
-/* eslint-disable */
-// Generated using typescript-generator version 3.2.1263 on 2025-07-22 22:50:57.
+ 
+// Generated using typescript-generator version 3.2.1263 on 2025-07-24 10:09:01.
 
 export interface ActivityCreateDTO {
     id: number;
@@ -24,7 +24,7 @@ export interface ProposedTimeSlotCreateDTO {
 
 export interface ScheduledLessonCreateDTO {
     id: number;
-    startTime: Date;
+    startTime?: Date;
     durationInMinutes: number;
     lessonId: number;
     instructorUserId: number;
@@ -75,7 +75,7 @@ export interface ProposedTimeSlotResponseDTO {
 
 export interface ScheduledLessonResponseDTO {
     id: number;
-    startTime: Date;
+    startTime?: Date;
     durationInMinutes: number;
     lesson: LessonResponseDTO;
     instructor: UserResponseDTO;
@@ -171,7 +171,7 @@ export interface WorkshopSummaryDTO {
 
 export interface ScheduledLessonSummaryDTO {
     id: number;
-    startTime: Date;
+    startTime?: Date;
     durationInMinutes: number;
     lesson: LessonResponseDTO;
     instructor: UserSummaryDTO;

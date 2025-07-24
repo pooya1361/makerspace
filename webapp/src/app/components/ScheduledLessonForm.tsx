@@ -3,6 +3,7 @@
 
 import { ScheduledLessonCreateDTO, ScheduledLessonResponseDTO } from '@/app/interfaces/api';
 import { useCreateScheduledLessonMutation, useDeleteScheduledLessonMutation, useGetLessonsQuery, useGetUsersQuery, useUpdateScheduledLessonMutation } from '@/app/lib/features/api/apiSlice';
+import moment from 'moment';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -48,17 +49,14 @@ export default function ScheduledLessonForm({ initialScheduledLesson }: Schedule
     }, [initialScheduledLesson]);
 
     const handleLessonChange = (value: string) => {
-        console.log("🚀 ~ handleLessonChange ~ value:", value)
         // Convert string to number, if empty string, set to null
-        const id = value === "-1" ? Number(value) : null;
-        console.log("🚀 ~ handleLessonChange ~ id:", id)
+        const id = value !== "-1" ? Number(value) : null;
         setLessonId(id);
     };
 
     const handleUserChange = (value: string) => {
         // Convert string to number, if empty string, set to null
-        const id = value === "-1" ? Number(value) : null;
-        console.log("🚀 ~ handleLessonChange ~ id:", id)
+        const id = value !== "-1" ? Number(value) : null;
         setInstructorId(id);
     };
 
@@ -162,15 +160,15 @@ export default function ScheduledLessonForm({ initialScheduledLesson }: Schedule
             )}
 
             <form onSubmit={handleSubmit}>
-                <div className="mb-4">
-                    <label htmlFor="name" className="block text-gray-700 text-sm font-bold mb-2">
-                        Start time:
-                    </label>
-                    {/* <input 
-                        type="datetime-local" 
-                        className="border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500" 
-                        value={startTime} /> */}
-                </div>
+                {!!startTime ?
+                    <div className="mb-4">
+                        <label htmlFor="name" className="block text-gray-700 text-sm font-bold mb-2">
+                            Scheduled start time:
+                        </label>
+                        <span className="block text-gray-700 text-sm mb-2">{moment(startTime).format('YYYY-MM-DD HH:mm')}</span>
+                        {/* <DateTimeInput value={startTime} onChange={setStartTime} /> */}
+                    </div> : undefined
+                }
 
                 <div className="mb-4">
                     <label htmlFor="description" className="block text-gray-700 text-sm font-bold mb-2">
@@ -226,14 +224,14 @@ export default function ScheduledLessonForm({ initialScheduledLesson }: Schedule
                         <p>Loading users...</p>
                     ) : (
                         <>
-                            {users && users.length > 0 ? ( // Check for lessons existence and length
+                            {users && users.length > 0 ? ( // Check for users existence and length
                                 <select
-                                    id="lessons"
+                                    id="users"
                                     onChange={(e) => handleUserChange(e.target.value)}
                                     className="border text-gray-700 text-sm rounded-lg block w-full p-2.5"
-                                    value={lessonId ?? ''} // Use empty string for null/undefined to select default option
+                                    value={instructorId ?? ''} // Use empty string for null/undefined to select default option
                                 >
-                                    <option value={-1}>-- Select a Lesson --</option> {/* Added a placeholder option */}
+                                    <option value={-1}>-- Select an instructor --</option> {/* Added a placeholder option */}
                                     {users.map(user => (
                                         <option key={user.id} value={user.id}>
                                             {user.username}

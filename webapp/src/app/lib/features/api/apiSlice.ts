@@ -1,5 +1,5 @@
 // webapp/src/lib/features/api/apiSlice.ts
-import { ActivityCreateDTO, ActivityResponseDTO, Lesson, LessonCreateDTO, LessonResponseDTO, ProposedTimeSlot, ProposedTimeSlotResponseDTO, ScheduledLessonCreateDTO, ScheduledLessonResponseDTO, SummaryResponseDTO, UserResponseDTO, WorkshopCreateDTO, WorkshopResponseDTO } from '@/app/interfaces/api'; // Adjust path as needed
+import { ActivityCreateDTO, ActivityResponseDTO, Lesson, LessonCreateDTO, LessonResponseDTO, ProposedTimeSlot, ProposedTimeSlotCreateDTO, ProposedTimeSlotResponseDTO, ScheduledLessonCreateDTO, ScheduledLessonResponseDTO, SummaryResponseDTO, UserResponseDTO, WorkshopCreateDTO, WorkshopResponseDTO } from '@/app/interfaces/api'; // Adjust path as needed
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 export const apiSlice = createApi({
@@ -9,11 +9,6 @@ export const apiSlice = createApi({
     }),
     tagTypes: ['ScheduledLesson', 'Lesson', 'ProposedTimeSlot', 'Vote', 'Summary', 'Workshop', 'Activity', 'User'],
     endpoints: (builder) => ({
-        getProposedTimeSlotById: builder.query<ProposedTimeSlot, string>({
-            query: (id) => `/api/proposed-time-slots/${id}`,
-            providesTags: (result, error, id) => [{ type: 'ProposedTimeSlot', id }],
-        }),
-
         getVotesForProposedTimeSlot: builder.query<ProposedTimeSlotResponseDTO, string>({
             query: (proposedTimeSlotId) => `/api/proposed-time-slots/${proposedTimeSlotId}`,
             providesTags: (result, error, proposedTimeSlotId) => [{ type: 'Vote', id: proposedTimeSlotId }],
@@ -30,6 +25,40 @@ export const apiSlice = createApi({
         }),
 
         /**
+         * ------------------------------------------------------------ Proposed time slot ------------------------------------------------------------
+        */
+        getProposedTimeSlotById: builder.query<ProposedTimeSlot, string>({
+            query: (id) => `/api/proposed-time-slots/${id}`,
+            providesTags: (result, error, id) => [{ type: 'ProposedTimeSlot', id }],
+        }),
+
+        addProposedTimeSlot: builder.mutation<ProposedTimeSlotResponseDTO, Omit<ProposedTimeSlotCreateDTO, 'id'>>({
+            query: (newProposedTimeSlot) => ({
+                url: '/api/proposed-time-slots',
+                method: 'POST',
+                body: newProposedTimeSlot,
+            }),
+            invalidatesTags: ['ScheduledLesson', 'ProposedTimeSlot'],
+        }),
+
+        updateProposedTimeSlot: builder.mutation<ProposedTimeSlotResponseDTO, ProposedTimeSlotCreateDTO>({
+            query: ({ id, ...patch }) => ({
+                url: `/api/proposed-time-slots/${id}`,
+                method: 'PATCH',
+                body: patch,
+            }),
+            invalidatesTags: (result, error, { id }) => ['ProposedTimeSlot', { type: 'ProposedTimeSlot', id }, 'ScheduledLesson'],
+        }),
+
+        deleteProposedTimeSlot: builder.mutation<void, number>({
+            query: (id) => ({
+                url: `/api/proposed-time-slots/${id}`,
+                method: 'DELETE',
+            }),
+            invalidatesTags: (result, error, id) => ['ProposedTimeSlot', { type: 'ProposedTimeSlot', id }, 'ScheduledLesson'],
+        }),
+
+        /**
         * ------------------------------------------------------------ Scheduled Lesson ------------------------------------------------------------
         */
         getScheduledLessons: builder.query<ScheduledLessonResponseDTO[], void>({
@@ -37,8 +66,20 @@ export const apiSlice = createApi({
             providesTags: ['ScheduledLesson'], // Tag for caching
         }),
 
-        getScheduledLessonById: builder.query<ScheduledLessonResponseDTO, string>({
+        getScheduledLessonById: builder.query<ScheduledLessonResponseDTO, number>({
             query: (id) => `/api/scheduled-lessons/${id}`,
+            transformResponse: (response: ScheduledLessonResponseDTO) => {
+                return {
+                    ...response,
+                    startTime: response.startTime instanceof String ? new Date(response.startTime) : response.startTime, // Convert the string to a Date object
+                    proposedTimeSlots: response.proposedTimeSlots.map(pts => {
+                        return {
+                            ...pts,
+                            proposedStartTime: new Date(pts.proposedStartTime)
+                        }
+                    })
+                };
+            },
             providesTags: (result, error, id) => [{ type: 'ScheduledLesson', id }],
         }),
 
@@ -194,10 +235,15 @@ export const apiSlice = createApi({
 
 // Export the auto-generated hooks
 export const {
-    useGetProposedTimeSlotByIdQuery,
     useGetVotesForProposedTimeSlotQuery,
     useGetOverallSummaryQuery,
     useGetUsersQuery,
+    
+    // Proposed time slot
+    useGetProposedTimeSlotByIdQuery,
+    useAddProposedTimeSlotMutation,
+    useUpdateProposedTimeSlotMutation,
+    useDeleteProposedTimeSlotMutation,
 
     // Lesson
     useGetLessonByIdQuery,

@@ -29,11 +29,13 @@ export default function ScheduledLessonsListClient() {
                 <div key={scheduledLesson.id} className="bg-white rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-300">
                     {/* Add a placeholder image or actual image if available */}
                     {/* <img src={lesson.imageUrl || '/placeholder-lesson.jpg'} alt={lesson.name} className="w-full h-48 object-cover" /> */}
-                    <div className="p-6">
-                        <h2 className="text-2xl font-semibold mb-2 text-gray-900">{scheduledLesson.lesson.name}</h2>
-                        <h4 className="mb-2 text-gray-400">{scheduledLesson.lesson.activity.name} [{scheduledLesson.lesson.activity.workshop.name}]</h4>
-                        <p className="text-gray-600 text-sm mb-4 line-clamp-3">Instructor: {scheduledLesson.instructor.username}</p>
-                        <p className="text-gray-600 text-sm mb-4 line-clamp-3">{scheduledLesson.durationInMinutes} minutes</p>
+                    <div className="p-6 flex flex-col justify-between h-full">
+                        <div className="">
+                            <h2 className="text-2xl font-semibold mb-2 text-gray-900">{scheduledLesson.lesson.name}</h2>
+                            <h4 className="mb-2 text-gray-400">{scheduledLesson.lesson.activity.name} [{scheduledLesson.lesson.activity.workshop.name}]</h4>
+                            <p className="text-gray-600 text-sm mb-4 line-clamp-3">Instructor: {scheduledLesson.instructor.username}</p>
+                            <p className="text-gray-600 text-sm mb-4 line-clamp-3">{scheduledLesson.durationInMinutes} minutes</p>
+                        </div>
                         <div className='flex gap-3 justify-between'>
                             <Link
                                 href={`/scheduled-lessons/${scheduledLesson.id}`} // Link to a dynamic lesson detail page

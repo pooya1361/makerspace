@@ -1,6 +1,0 @@
-// .eslintrc.json
-{
-    "rules": {
-        "@typescript-eslint/no-explicit-any": "off" // Not recommended!
-    }
-}
