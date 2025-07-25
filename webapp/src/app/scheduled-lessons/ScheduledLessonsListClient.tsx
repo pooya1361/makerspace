@@ -1,5 +1,6 @@
 //app/lessons/ScheduledLessonsListClient.tsx
 'use client';
+import moment from "moment";
 import Link from "next/link";
 import { apiSlice } from "../lib/features/api/apiSlice";
 
@@ -35,6 +36,10 @@ export default function ScheduledLessonsListClient() {
                             <h4 className="mb-2 text-gray-400">{scheduledLesson.lesson.activity.name} [{scheduledLesson.lesson.activity.workshop.name}]</h4>
                             <p className="text-gray-600 text-sm mb-4 line-clamp-3">Instructor: {scheduledLesson.instructor.username}</p>
                             <p className="text-gray-600 text-sm mb-4 line-clamp-3">{scheduledLesson.durationInMinutes} minutes</p>
+                            {scheduledLesson.startTime ?
+                                <p className="text-gray-600 text-sm mb-4 line-clamp-3">{moment(scheduledLesson.startTime).format('YYYY-MM-DD HH:mm')}</p>
+                                : undefined
+                            }
                         </div>
                         <div className='flex gap-3 justify-between'>
                             <Link

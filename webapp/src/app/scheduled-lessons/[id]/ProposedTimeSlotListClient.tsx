@@ -3,10 +3,11 @@
 
 import { ConfirmationPopup } from "@/app/components/ConfirmationPopup";
 import { ProposedTimeSlotSummaryDTO } from "@/app/interfaces/api";
-import { useAddProposedTimeSlotMutation, useDeleteProposedTimeSlotMutation, useGetScheduledLessonByIdQuery, useUpdateProposedTimeSlotMutation } from "@/app/lib/features/api/apiSlice";
+import { useAddProposedTimeSlotMutation, useDeleteProposedTimeSlotMutation, useGetScheduledLessonByIdQuery, useUpdateProposedTimeSlotMutation, useUpdateScheduledLessonMutation } from "@/app/lib/features/api/apiSlice";
+import { isEqual } from "date-fns";
 import moment from "moment";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import ProposedTimeSlotPopup from "./ProposedTimeSlotPopup";
 
 interface ProposedTimeSlotListClientProps {
@@ -19,12 +20,14 @@ export default function ProposedTimeSlotListClient({ scheduledLessonId }: Propos
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
     const [isEditDialogPopupOpen, setIsEditDialogPopupOpen] = useState(false);
+    const [isChoosePopupOpen, setIsChoosePopupOpen] = useState(false);
     const [selectedSlot, setSelectedSlot] = useState<ProposedTimeSlotSummaryDTO>();
-    const [action, setAction] = useState<"ADD" | "UPDATE" | "DELETE" | undefined>();
+    const [action, setAction] = useState<"ADD" | "UPDATE" | "DELETE" | "CHOOSE" | undefined>();
 
     const [addProposedTimeSlot] = useAddProposedTimeSlotMutation();
     const [updateProposedTimeSlot] = useUpdateProposedTimeSlotMutation();
     const [deleteProposedTimeSlot] = useDeleteProposedTimeSlotMutation();
+    const [updateScheduledLesson] = useUpdateScheduledLessonMutation()
 
     const handleAddProposedSlot = () => {
         setSelectedSlot(undefined); // Clear any editing state
@@ -41,9 +44,25 @@ export default function ProposedTimeSlotListClient({ scheduledLessonId }: Propos
         setIsPopupOpen(true)
     }
 
+    const handleChooseAsStartTime = async () => {
+        await updateScheduledLesson({
+            id: scheduledLesson!.id,
+            startTime: selectedSlot!.proposedStartTime,
+            durationInMinutes: scheduledLesson!.durationInMinutes,
+            lessonId: scheduledLesson!.lesson.id,
+            instructorUserId: scheduledLesson!.instructor.id
+        })
+        resetDialogs()
+    }
+
     const handleDeleteProposedSlot = (selectedSlot: ProposedTimeSlotSummaryDTO) => {
         setSelectedSlot(selectedSlot);
         setAction("DELETE")
+    }
+
+    const handleChooseProposedSlot = (selectedSlot: ProposedTimeSlotSummaryDTO) => {
+        setSelectedSlot(selectedSlot);
+        setAction("CHOOSE")
     }
 
     const handleConfirmDeleteProposedSlot = useCallback(async () => {
@@ -57,12 +76,12 @@ export default function ProposedTimeSlotListClient({ scheduledLessonId }: Propos
         setIsDeletePopupOpen(false)
         setIsPopupOpen(false)
         setIsEditDialogPopupOpen(false)
+        setIsChoosePopupOpen(false)
     }
 
     useEffect(() => {
         if (!!action) {
             if (!!selectedSlot) {
-                console.log("🚀 ~ ProposedTimeSlotListClient ~ selectedSlot.votes:", selectedSlot.votes.length ?? 0)
                 // action = UPDATE | DELETE
                 switch (action) {
                     case "UPDATE":
@@ -80,6 +99,10 @@ export default function ProposedTimeSlotListClient({ scheduledLessonId }: Propos
                             handleConfirmDeleteProposedSlot();
                         }
                         break;
+
+                    case "CHOOSE":
+                        setIsChoosePopupOpen(true)
+                        break
 
                     default:
                         break;
@@ -123,6 +146,19 @@ export default function ProposedTimeSlotListClient({ scheduledLessonId }: Propos
 
     };
 
+
+    const sortedProposedTimeSlots = useMemo(() => {
+        if (!scheduledLesson?.proposedTimeSlots) {
+            return [];
+        }
+        // Create a shallow copy before sorting to avoid mutating the original array
+        return [...scheduledLesson.proposedTimeSlots].sort((a, b) => {
+            const votesA = a.votes?.length ?? 0;
+            const votesB = b.votes?.length ?? 0;
+            return votesB - votesA; // Descending order (b - a)
+        });
+    }, [scheduledLesson?.proposedTimeSlots]);
+
     // --- Loading and Error States for Data Fetching ---
     if (isLoading) {
         return (
@@ -162,11 +198,14 @@ export default function ProposedTimeSlotListClient({ scheduledLessonId }: Propos
                     ✚ Propose a Time Slot
                 </button>
             </div>
-            {scheduledLesson.proposedTimeSlots && scheduledLesson.proposedTimeSlots.length > 0 ? (
+            {sortedProposedTimeSlots.length > 0 ? (
                 <div className="overflow-x-auto">
                     <table className="min-w-full bg-white border border-gray-200 shadow-sm rounded-lg">
                         <thead className="bg-gray-100">
                             <tr>
+                                {scheduledLesson.startTime ?
+                                    <th className="py-2 px-4 border-b text-left text-sm font-medium text-gray-600 w-6"></th>
+                                    : undefined}
                                 <th className="py-2 px-4 border-b text-left text-sm font-medium text-gray-600">Start Time</th>
                                 <th className="py-2 px-4 border-b text-left text-sm font-medium text-gray-600">End Time</th>
                                 <th className="py-2 px-4 border-b text-left text-sm font-medium text-gray-600">Votes</th>
@@ -175,7 +214,7 @@ export default function ProposedTimeSlotListClient({ scheduledLessonId }: Propos
                             </tr>
                         </thead>
                         <tbody>
-                            {scheduledLesson.proposedTimeSlots.map((slot: ProposedTimeSlotSummaryDTO) => {
+                            {sortedProposedTimeSlots.map((slot: ProposedTimeSlotSummaryDTO) => {
                                 // Create a new Date object for proposedStartTime to avoid modifying it
                                 const startTime = slot.proposedStartTime ? new Date(slot.proposedStartTime) : null;
                                 // Calculate endTime by adding durationInMinutes to a NEW Date object based on startTime
@@ -183,6 +222,12 @@ export default function ProposedTimeSlotListClient({ scheduledLessonId }: Propos
 
                                 return (
                                     <tr key={slot.id} className="hover:bg-gray-50">
+                                        {scheduledLesson.startTime ?
+                                            <td className="py-2 px-4 border-b text-sm text-gray-800">{
+                                                isEqual(scheduledLesson.startTime, slot.proposedStartTime) ?
+                                                    <span title="Chosen proposed start time">✅</span>
+                                                    : undefined}</td>
+                                            : undefined}
                                         <td className="py-2 px-4 border-b text-sm text-gray-800">
                                             {startTime ? moment(startTime).format('YYYY-MM-DD HH:mm') : 'N/A'}
                                         </td>
@@ -195,26 +240,43 @@ export default function ProposedTimeSlotListClient({ scheduledLessonId }: Propos
                                         <td className="py-2 px-4 border-b text-sm text-gray-800 text-end">
                                             <Link
                                                 href={`/proposed-time-slots/${slot.id}/votes?scheduledLessonId=${scheduledLesson.id}`} // Link to the new votes page
-                                                className="ml-2 text-blue-500 hover:underline"
+                                                className="ml-2 text-blue-500 hover:underline mr-1"
                                             >
-                                                <button className="rounded-md cursor-pointer p-1.5 border border-transparent text-center text-sm text-white transition-all shadow-sm hover:shadow focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none" type="button">
+                                                <button 
+                                                    className="rounded-md cursor-pointer p-1.5 border border-transparent text-center text-sm text-white transition-all shadow-sm hover:shadow focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none" 
+                                                    type="button"
+                                                    title="See the votes"
+                                                >
                                                     🗳️
                                                 </button>
                                             </Link>
-                                            <button
-                                                onClick={() => handleEditProposedSlot(slot)} // Pass the Date object
-                                                className="rounded-md cursor-pointer p-1.5 border border-transparent text-center text-sm text-white transition-all shadow-sm hover:shadow focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-                                                disabled={!startTime} // Disable if startTime is null
-                                            >
-                                                📝
-                                            </button>
-                                            <button
-                                                onClick={() => handleDeleteProposedSlot(slot)} // Pass the Date object
-                                                className="rounded-md cursor-pointer p-1.5 border border-transparent text-center text-sm text-white transition-all shadow-sm hover:shadow focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-                                                disabled={!startTime} // Disable if startTime is null
-                                            >
-                                                ❌
-                                            </button>
+                                            {!scheduledLesson.startTime ?
+                                                <>
+                                                    <button
+                                                        onClick={() => handleEditProposedSlot(slot)} // Pass the Date object
+                                                        className="rounded-md cursor-pointer p-1.5 border border-transparent text-center text-sm text-white transition-all shadow-sm hover:shadow focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none mr-1"
+                                                        disabled={!startTime} // Disable if startTime is null
+                                                        title="Update"
+                                                    >
+                                                        📝
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDeleteProposedSlot(slot)} // Pass the Date object
+                                                        className="rounded-md cursor-pointer p-1.5 border border-transparent text-center text-sm text-white transition-all shadow-sm hover:shadow focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none mr-1"
+                                                        disabled={!startTime}
+                                                        title="Delete"
+                                                    >
+                                                        ❌
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleChooseProposedSlot(slot)} // Pass the Date object
+                                                        className="rounded-md cursor-pointer p-1.5 border border-transparent text-center text-sm text-white transition-all shadow-sm hover:shadow focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                                                        title="Choose as start time for this scheduled lesson"
+                                                    >
+                                                        ✅
+                                                    </button>
+                                                </> : undefined
+                                            }
                                         </td>
                                     </tr>
                                 );
@@ -244,6 +306,13 @@ export default function ProposedTimeSlotListClient({ scheduledLessonId }: Propos
                 isOpen={isEditDialogPopupOpen}
                 message="This time slot has already some votes. Are you sure you want to edit it?"
                 onConfirm={handleEditDialogPopupOpen}
+                onCancel={resetDialogs}
+            />
+
+            <ConfirmationPopup
+                isOpen={isChoosePopupOpen}
+                message="Are you sure you want to choose this time slot as start time for the lesson?"
+                onConfirm={handleChooseAsStartTime}
                 onCancel={resetDialogs}
             />
         </div>
