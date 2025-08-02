@@ -1,6 +1,6 @@
 /* tslint:disable */
- 
-// Generated using typescript-generator version 3.2.1263 on 2025-07-24 10:09:01.
+/* eslint-disable */
+// Generated using typescript-generator version 3.2.1263 on 2025-08-02 12:32:36.
 
 export interface ActivityCreateDTO {
     id: number;
@@ -92,8 +92,9 @@ export interface SummaryResponseDTO {
 
 export interface UserResponseDTO {
     id: number;
-    username: string;
     email: string;
+    firstName: string;
+    lastName: string;
     userType: UserType;
 }
 
@@ -140,11 +141,11 @@ export interface ScheduledLesson {
     proposedTimeSlots: ProposedTimeSlot[];
 }
 
-export interface User {
+export interface User extends UserDetails {
     id: number;
-    username: string;
     email: string;
-    password: string;
+    firstName: string;
+    lastName: string;
     userType: UserType;
 }
 
@@ -201,4 +202,21 @@ export interface ActivitySummaryDTO {
     description: string;
 }
 
-export type UserType = "NORMAL" | "MODERATOR" | "ADMIN" | "SUPERADMIN";
+export interface GrantedAuthority extends Serializable {
+    authority: string;
+}
+
+export interface UserDetails extends Serializable {
+    enabled: boolean;
+    accountNonExpired: boolean;
+    credentialsNonExpired: boolean;
+    password: string;
+    username: string;
+    authorities: GrantedAuthority[];
+    accountNonLocked: boolean;
+}
+
+export interface Serializable {
+}
+
+export type UserType = "NORMAL" | "INSTRUCTOR" | "ADMIN" | "SUPERADMIN";

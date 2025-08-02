@@ -234,7 +234,7 @@ export default function ScheduledLessonForm({ initialScheduledLesson }: Schedule
                                     <option value={-1}>-- Select an instructor --</option> {/* Added a placeholder option */}
                                     {users.map(user => (
                                         <option key={user.id} value={user.id}>
-                                            {user.username}
+                                            {user.firstName} + {user.lastName}
                                         </option>
                                     ))}
                                 </select>

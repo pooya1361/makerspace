@@ -34,7 +34,7 @@ export default function ScheduledLessonsListClient() {
                         <div className="">
                             <h2 className="text-2xl font-semibold mb-2 text-gray-900">{scheduledLesson.lesson.name}</h2>
                             <h4 className="mb-2 text-gray-400">{scheduledLesson.lesson.activity.name} [{scheduledLesson.lesson.activity.workshop.name}]</h4>
-                            <p className="text-gray-600 text-sm mb-4 line-clamp-3">Instructor: {scheduledLesson.instructor.username}</p>
+                            <p className="text-gray-600 text-sm mb-4 line-clamp-3">Instructor: {scheduledLesson.instructor.firstName} {scheduledLesson.instructor.lastName}</p>
                             <p className="text-gray-600 text-sm mb-4 line-clamp-3">{scheduledLesson.durationInMinutes} minutes</p>
                             {scheduledLesson.startTime ?
                                 <p className="text-gray-600 text-sm mb-4 line-clamp-3">{moment(scheduledLesson.startTime).format('YYYY-MM-DD HH:mm')}</p>

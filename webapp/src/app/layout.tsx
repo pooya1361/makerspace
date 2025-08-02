@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import AuthStatusWatcher from "./components/AuthStatusWatcher";
 import Header from "./components/Header";
+import WelcomeRibbon from "./components/WelcomeRibbon";
+import "./globals.css";
 import { ReduxProvider } from "./lib/provider";
 
 const geistSans = Geist({
@@ -32,6 +34,8 @@ export default function RootLayout({
       >
         <ReduxProvider>
           <Header />
+          <WelcomeRibbon />
+          <AuthStatusWatcher />
           <main>
             {children}
           </main>

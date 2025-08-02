@@ -1,14 +1,73 @@
 // webapp/src/lib/features/api/apiSlice.ts
 import { ActivityCreateDTO, ActivityResponseDTO, Lesson, LessonCreateDTO, LessonResponseDTO, ProposedTimeSlotCreateDTO, ProposedTimeSlotResponseDTO, ScheduledLessonCreateDTO, ScheduledLessonResponseDTO, SummaryResponseDTO, UserResponseDTO, VoteCreateDTO, VoteResponseDTO, WorkshopCreateDTO, WorkshopResponseDTO } from '@/app/interfaces/api'; // Adjust path as needed
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { logout as authLogout, setCredentials } from '../auth/authSlice';
+
+interface LoginRequest {
+    email: string;
+    password: string;
+}
+
+interface LoginResponse {
+    user: UserResponseDTO
+}
+
+const baseQuery = fetchBaseQuery({
+    baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || 'https://localhost:8080',
+    credentials: 'include', 
+    prepareHeaders: (headers) => { 
+        console.log('RTK Query: Making request with cookies');
+        return headers;
+    },
+});
+
+const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
+    const result = await baseQuery(args, api, extraOptions);
+
+    if (result.error && result.error.status === 401) {
+        console.warn('Unauthorized request. Dispatching logout...');
+
+        try {
+            await baseQuery('/api/auth/logout', api, {
+                ...extraOptions,
+                method: 'POST'
+            });
+        } catch (logoutError) {
+            console.warn('Logout endpoint failed:', logoutError);
+        }
+
+        api.dispatch(authLogout());
+        api.dispatch(apiSlice.util.resetApiState());
+    }
+
+    return result;
+};
+
+
 
 export const apiSlice = createApi({
-    reducerPath: 'api', // Unique name for the slice in the Redux store
-    baseQuery: fetchBaseQuery({
-        baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080',
-    }),
+    reducerPath: 'api',
+    baseQuery: baseQueryWithReauth,
     tagTypes: ['ScheduledLesson', 'Lesson', 'ProposedTimeSlot', 'Vote', 'Summary', 'Workshop', 'Activity', 'User'],
     endpoints: (builder) => ({
+        login: builder.mutation<LoginResponse, LoginRequest>({
+            query: (credentials) => ({
+                url: '/api/auth/login',
+                method: 'POST',
+                body: credentials,
+            }),
+            async onQueryStarted(credentials, { dispatch, queryFulfilled }) {
+                try {
+                    const { data } = await queryFulfilled;
+                    dispatch(setCredentials({
+                        user: data.user
+                    }));
+                    console.log('Login successful - cookies set by server');
+                } catch (error) {
+                    console.error('Login failed:', error);
+                }
+            },
+        }),
 
         getOverallSummary: builder.query<SummaryResponseDTO, void>({
             query: () => '/api/summary',
@@ -242,6 +301,7 @@ export const apiSlice = createApi({
 
 // Export the auto-generated hooks
 export const {
+    useLoginMutation,
     useGetOverallSummaryQuery,
     useGetUsersQuery,
     

@@ -1,14 +1,14 @@
 // components/ProposedTimeSlotPopup.tsx
 'use client'; // This component uses client-side interactivity
 
-import { UserSummaryDTO } from '@/app/interfaces/api';
+import { UserResponseDTO } from '@/app/interfaces/api';
 import { useEffect, useRef, useState } from 'react';
 
 interface ProposedTimeSlotPopupProps {
     isOpen: boolean;
     onClose: () => void;
     onSave: (userId: number) => void;
-    users: UserSummaryDTO[] | undefined
+    users: UserResponseDTO[] | undefined
 }
 
 export default function ProposedTimeSlotPopup({
@@ -77,7 +77,7 @@ export default function ProposedTimeSlotPopup({
                                 <option value={-1}>-- Select an user --</option> {/* Added a placeholder option */}
                                 {users.map(user => (
                                     <option key={user.id} value={user.id}>
-                                        {user.username}
+                                        {user.firstName} {user.lastName}
                                     </option>
                                 ))}
                             </select>

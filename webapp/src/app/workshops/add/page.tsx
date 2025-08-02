@@ -1,11 +1,11 @@
 // webapp/src/app/workshops/add/page.tsx
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation'; // Correct import for useRouter in App Router
-import Link from 'next/link';
-import { useCreateWorkshopMutation } from '@/app/lib/features/api/apiSlice';
 import { revalidateWorkshopsPath } from '@/app/actions';
+import { useCreateWorkshopMutation } from '@/app/lib/features/api/apiSlice';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation'; // Correct import for useRouter in App Router
+import { useState } from 'react';
 
 export default function AddWorkshopPage() {
     const router = useRouter();
@@ -16,7 +16,7 @@ export default function AddWorkshopPage() {
     const [successMessage, setSuccessMessage] = useState('');
 
     // RTK Query mutation hook
-    const [createWorkshop, { isLoading, isSuccess, isError, error }] = useCreateWorkshopMutation();
+    const [createWorkshop, { isLoading }] = useCreateWorkshopMutation();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

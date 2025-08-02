@@ -2,18 +2,37 @@
 "use client"; // Keep this directive at the very top
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation'; // Correct import for App Router
-import { useState } from 'react';
-import NavLink from './NavLink'; // Assuming NavLink is in the same directory
-
+import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { apiSlice } from '../lib/features/api/apiSlice';
+import { logout, selectIsLoggedIn } from '../lib/features/auth/authSlice';
+import NavLink from './NavLink';
 export default function Header() {
-    // Use usePathname for the App Router to get the current URL path
-    const pathname = usePathname();
-
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
+    const [mounted, setMounted] = useState(false);
+
+    const currentPathname = usePathname();
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    const pathname = mounted ? currentPathname : '/';
+
+    const isLoggedIn = useSelector(selectIsLoggedIn);
+    const dispatch = useDispatch();
 
     const toggleMobileMenu = () => {
         setIsMobileMenuOpen(!isMobileMenuOpen);
+    };
+
+    const handleLogout = () => {
+        if (typeof window !== 'undefined') {
+            console.log('User logged out.');
+            dispatch(logout());
+            dispatch(apiSlice.util.resetApiState());
+        }
     };
 
     return (
@@ -26,12 +45,20 @@ export default function Header() {
 
                 {/* Desktop Navigation */}
                 <nav className="hidden md:flex space-x-6">
-                    <NavLink href="/" currentPath={pathname}>Home</NavLink>
-                    <NavLink href="/workshops" currentPath={pathname}>Workshops</NavLink>
-                    <NavLink href="/activities" currentPath={pathname}>Activities</NavLink>
-                    <NavLink href="/lessons" currentPath={pathname}>Lessons</NavLink>
-                    <NavLink href="/scheduled-lessons" currentPath={pathname}>Scheduled Lessons</NavLink>
-                    <NavLink href="/login" currentPath={pathname}>Login</NavLink>
+                    {isLoggedIn ? (
+                        <>
+                            <NavLink href="/" currentPath={pathname}>Home</NavLink>
+                            <NavLink href="/workshops" currentPath={pathname}>Workshops</NavLink>
+                            <NavLink href="/activities" currentPath={pathname}>Activities</NavLink>
+                            <NavLink href="/lessons" currentPath={pathname}>Lessons</NavLink>
+                            <NavLink href="/scheduled-lessons" currentPath={pathname}>Scheduled Lessons</NavLink>
+                            <button onClick={handleLogout} className="text-white hover:text-blue-200 transition duration-300">
+                                Logout
+                            </button>
+                        </>
+                    ) : (
+                        <NavLink href="/login" currentPath={pathname}>Login</NavLink>
+                    )}
                 </nav>
 
                 {/* Mobile Menu Button (Hamburger Icon) */}
@@ -54,12 +81,20 @@ export default function Header() {
             {isMobileMenuOpen && (
                 <div className="md:hidden bg-blue-800 py-4 mt-2 rounded-lg shadow-lg">
                     <nav className="flex flex-col items-center space-y-4">
-                        <NavLink href="/" currentPath={pathname} onSelect={toggleMobileMenu}>Home</NavLink>
-                        <NavLink href="/workshops" currentPath={pathname} onSelect={toggleMobileMenu}>Workshops</NavLink>
-                        <NavLink href="/activities" currentPath={pathname} onSelect={toggleMobileMenu}>Activities</NavLink>
-                        <NavLink href="/lessons" currentPath={pathname} onSelect={toggleMobileMenu}>Lessons</NavLink>
-                        <NavLink href="/scheduled-lessons" currentPath={pathname} onSelect={toggleMobileMenu}>Scheduled Lessons</NavLink>
-                        <NavLink href="/login" currentPath={pathname} onSelect={toggleMobileMenu}>Login</NavLink>
+                        {isLoggedIn ? (
+                            <>
+                                <NavLink href="/" currentPath={pathname} onSelect={toggleMobileMenu}>Home</NavLink>
+                                <NavLink href="/workshops" currentPath={pathname} onSelect={toggleMobileMenu}>Workshops</NavLink>
+                                <NavLink href="/activities" currentPath={pathname} onSelect={toggleMobileMenu}>Activities</NavLink>
+                                <NavLink href="/lessons" currentPath={pathname} onSelect={toggleMobileMenu}>Lessons</NavLink>
+                                <NavLink href="/scheduled-lessons" currentPath={pathname} onSelect={toggleMobileMenu}>Scheduled Lessons</NavLink>
+                                <button onClick={() => { handleLogout(); toggleMobileMenu(); }} className="text-white hover:text-blue-200 transition duration-300">
+                                    Logout
+                                </button>
+                            </>
+                        ) : (
+                            <NavLink href="/login" currentPath={pathname} onSelect={toggleMobileMenu}>Login</NavLink>
+                        )}
                     </nav>
                 </div>
             )}
