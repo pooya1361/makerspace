@@ -6,11 +6,15 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 interface AuthState {
     user: UserResponseDTO | null;
     isLoggedIn: boolean;
+    hasCheckedAuth: boolean;
+    isLoggingOut: boolean;
 }
 
 const initialState: AuthState = {
     user: null,
-    isLoggedIn: false, // Will be set to true after successful login
+    isLoggedIn: false, 
+    hasCheckedAuth: false,
+    isLoggingOut: false,
 };
 
 const authSlice = createSlice({
@@ -23,24 +27,32 @@ const authSlice = createSlice({
         ) => {
             state.user = action.payload.user;
             state.isLoggedIn = true;
+            state.hasCheckedAuth = false
         },
-
+        
         logout: (state) => {
             state.user = null;
             state.isLoggedIn = false;
+            state.hasCheckedAuth = true
+            state.isLoggingOut = false;
         },
 
+        startLogout: (state) => {
+            state.isLoggingOut = true; // Set flag to prevent auth checks
+        },
+        
         setAuthStatus: (
             state,
             action: PayloadAction<{ isLoggedIn: boolean; user?: UserResponseDTO }>
         ) => {
             state.isLoggedIn = action.payload.isLoggedIn;
             state.user = action.payload.user || null;
+            state.hasCheckedAuth = true
         },
     },
 });
 
-export const { setCredentials, logout, setAuthStatus } = authSlice.actions;
+export const { setCredentials, logout, setAuthStatus, startLogout } = authSlice.actions;
 
 export default authSlice.reducer;
 
@@ -49,3 +61,5 @@ export const selectIsLoggedIn = (state: { auth: AuthState }) => state.auth.isLog
 export const selectCurrentUser = (state: { auth: AuthState }) => state.auth.user;
 export const selectUserEmail = (state: { auth: AuthState }) => state.auth.user?.email;
 export const selectUserRole = (state: { auth: AuthState }) => state.auth.user?.userType;
+export const selectHasCheckedAuth = (state: { auth: AuthState }) => state.auth.hasCheckedAuth;
+export const selectIsLoggingOut = (state: { auth: AuthState }) => state.auth.isLoggingOut;

@@ -1,7 +1,7 @@
 // webapp/src/lib/features/api/apiSlice.ts
 import { ActivityCreateDTO, ActivityResponseDTO, Lesson, LessonCreateDTO, LessonResponseDTO, ProposedTimeSlotCreateDTO, ProposedTimeSlotResponseDTO, ScheduledLessonCreateDTO, ScheduledLessonResponseDTO, SummaryResponseDTO, UserResponseDTO, VoteCreateDTO, VoteResponseDTO, WorkshopCreateDTO, WorkshopResponseDTO } from '@/app/interfaces/api'; // Adjust path as needed
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { logout as authLogout, setCredentials } from '../auth/authSlice';
+import { logout as authLogout, logout, setCredentials, startLogout } from '../auth/authSlice';
 
 interface LoginRequest {
     email: string;
@@ -14,8 +14,8 @@ interface LoginResponse {
 
 const baseQuery = fetchBaseQuery({
     baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || 'https://localhost:8080',
-    credentials: 'include', 
-    prepareHeaders: (headers) => { 
+    credentials: 'include',
+    prepareHeaders: (headers) => {
         console.log('RTK Query: Making request with cookies');
         return headers;
     },
@@ -43,8 +43,6 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
     return result;
 };
 
-
-
 export const apiSlice = createApi({
     reducerPath: 'api',
     baseQuery: baseQueryWithReauth,
@@ -67,6 +65,34 @@ export const apiSlice = createApi({
                     console.error('Login failed:', error);
                 }
             },
+        }),
+
+        logout: builder.mutation<void, void>({
+            query: () => ({
+                url: '/api/auth/logout',
+                method: 'POST',
+            }),
+            async onQueryStarted(_, { dispatch, queryFulfilled }) {
+                // Set logout flag immediately to prevent auth checks
+                dispatch(startLogout());
+
+                try {
+                    await queryFulfilled; // Wait for server to clear cookie
+                    console.log('Logout successful - server cleared cookies');
+                } catch (error) {
+                    console.error('Logout failed:', error);
+                } finally {
+                    // Clear client-side state regardless of success/failure
+                    dispatch(logout());
+                    dispatch(apiSlice.util.resetApiState());
+                }
+            },
+        }),
+
+        // Get current user info (for auth check on page load)
+        getCurrentUser: builder.query<any, void>({
+            query: () => '/api/auth/me',
+            providesTags: ['User'],
         }),
 
         getOverallSummary: builder.query<SummaryResponseDTO, void>({
@@ -302,9 +328,11 @@ export const apiSlice = createApi({
 // Export the auto-generated hooks
 export const {
     useLoginMutation,
+    useLogoutMutation,
+    useGetCurrentUserQuery,
     useGetOverallSummaryQuery,
     useGetUsersQuery,
-    
+
     // Vote
     useAddVoteMutation,
 

@@ -2,16 +2,18 @@
 "use client"; // Keep this directive at the very top
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { apiSlice } from '../lib/features/api/apiSlice';
-import { logout, selectIsLoggedIn } from '../lib/features/auth/authSlice';
+import { useSelector } from 'react-redux';
+import { useLogoutMutation } from '../lib/features/api/apiSlice';
+import { selectIsLoggedIn } from '../lib/features/auth/authSlice';
 import NavLink from './NavLink';
 export default function Header() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
+    const [logout, { isLoading }] = useLogoutMutation();
     const [mounted, setMounted] = useState(false);
-
+    const router = useRouter();
+    
     const currentPathname = usePathname();
 
     useEffect(() => {
@@ -21,17 +23,19 @@ export default function Header() {
     const pathname = mounted ? currentPathname : '/';
 
     const isLoggedIn = useSelector(selectIsLoggedIn);
-    const dispatch = useDispatch();
 
     const toggleMobileMenu = () => {
         setIsMobileMenuOpen(!isMobileMenuOpen);
     };
 
-    const handleLogout = () => {
-        if (typeof window !== 'undefined') {
-            console.log('User logged out.');
-            dispatch(logout());
-            dispatch(apiSlice.util.resetApiState());
+    const handleLogout = async () => {
+        try {
+            await logout().unwrap();
+            router.push('/login');
+        } catch (error) {
+            console.error('Logout failed:', error);
+            // Still redirect even if logout fails
+            router.push('/login');
         }
     };
 
@@ -52,7 +56,7 @@ export default function Header() {
                             <NavLink href="/activities" currentPath={pathname}>Activities</NavLink>
                             <NavLink href="/lessons" currentPath={pathname}>Lessons</NavLink>
                             <NavLink href="/scheduled-lessons" currentPath={pathname}>Scheduled Lessons</NavLink>
-                            <button onClick={handleLogout} className="text-white hover:text-blue-200 transition duration-300">
+                            <button onClick={handleLogout} className="text-white hover:text-blue-200 transition duration-300" disabled={isLoading}>
                                 Logout
                             </button>
                         </>
@@ -88,7 +92,7 @@ export default function Header() {
                                 <NavLink href="/activities" currentPath={pathname} onSelect={toggleMobileMenu}>Activities</NavLink>
                                 <NavLink href="/lessons" currentPath={pathname} onSelect={toggleMobileMenu}>Lessons</NavLink>
                                 <NavLink href="/scheduled-lessons" currentPath={pathname} onSelect={toggleMobileMenu}>Scheduled Lessons</NavLink>
-                                <button onClick={() => { handleLogout(); toggleMobileMenu(); }} className="text-white hover:text-blue-200 transition duration-300">
+                                <button onClick={() => { handleLogout(); toggleMobileMenu(); }} className="text-white hover:text-blue-200 transition duration-300" disabled={isLoading}>
                                     Logout
                                 </button>
                             </>

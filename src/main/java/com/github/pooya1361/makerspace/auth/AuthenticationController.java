@@ -1,11 +1,14 @@
 package com.github.pooya1361.makerspace.auth; // Adjust package
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,7 +51,6 @@ public class AuthenticationController {
                 .userType(UserType.NORMAL) // Assign a default role
                 .build();
         userRepository.save(user);
-        var jwtToken = jwtService.generateToken(user);
         return ResponseEntity.ok(AuthenticationResponse.builder().message("Registration successful").build());
     }
 
@@ -93,6 +95,26 @@ public class AuthenticationController {
         cookie.setMaxAge(0);
         cookie.setSecure(false);
         response.addCookie(cookie);
+
+        SecurityContextHolder.clearContext();
+
         return ResponseEntity.ok("Logged out successfully");
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentUser(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+        User user = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found after authentication")); // Should not happen if authentication succeeded
+
+        AuthenticationResponse loginResponse = new AuthenticationResponse();
+        loginResponse.setUser(userMapper.toDto(user));
+
+        return ResponseEntity.ok(loginResponse);
     }
 }

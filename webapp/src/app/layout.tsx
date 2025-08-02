@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import AuthStatusWatcher from "./components/AuthStatusWatcher";
 import Header from "./components/Header";
+import { SimpleAuthChecker } from "./components/SimpleAuthChecker";
 import WelcomeRibbon from "./components/WelcomeRibbon";
 import "./globals.css";
 import { ReduxProvider } from "./lib/provider";
@@ -36,9 +37,9 @@ export default function RootLayout({
           <Header />
           <WelcomeRibbon />
           <AuthStatusWatcher />
-          <main>
+          <SimpleAuthChecker>
             {children}
-          </main>
+          </SimpleAuthChecker>
         </ReduxProvider>
       </body>
     </html>
