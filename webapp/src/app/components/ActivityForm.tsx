@@ -1,18 +1,17 @@
 // webapp/src/app/activities/[id]/edit/ActivityEditForm.tsx or a new path like /components/ActivityForm.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { revalidateActivitiesPath } from '@/app/actions';
+import { ActivityCreateDTO, ActivityResponseDTO } from '@/app/interfaces/api';
 import {
-    useUpdateActivityMutation,
+    useCreateActivityMutation,
     useDeleteActivityMutation,
     useGetWorkshopsQuery,
-    useCreateActivityMutation, // <-- NEW: Add mutation hook
+    useUpdateActivityMutation,
 } from '@/app/lib/features/api/apiSlice';
-import { revalidateActivitiesPath } from '@/app/actions';
-import { ActivityResponseDTO } from '@/app/interfaces/api';
-import { ActivityCreateDTO } from '@/app/interfaces/api'; // Assuming you have this for add operations
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 // Type definition for the component's props
 type ActivityFormProps = {
@@ -128,7 +127,7 @@ export default function ActivityForm({ initialActivity }: ActivityFormProps) {
     };
 
     return (
-        <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-lg">
+        <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-lg text-gray-700">
             <h2 className="text-2xl font-bold mb-6 text-center">
                 {isEditMode ? 'Edit Activity' : 'Add New Activity'}
             </h2>

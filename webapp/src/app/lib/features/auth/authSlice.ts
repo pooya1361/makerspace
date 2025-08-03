@@ -63,3 +63,7 @@ export const selectUserEmail = (state: { auth: AuthState }) => state.auth.user?.
 export const selectUserRole = (state: { auth: AuthState }) => state.auth.user?.userType;
 export const selectHasCheckedAuth = (state: { auth: AuthState }) => state.auth.hasCheckedAuth;
 export const selectIsLoggingOut = (state: { auth: AuthState }) => state.auth.isLoggingOut;
+export const selectIsAdmin = (state: { auth: AuthState }) => {
+    const userType = state.auth.user?.userType;
+    return userType === 'ADMIN' || userType === 'SUPERADMIN';
+};

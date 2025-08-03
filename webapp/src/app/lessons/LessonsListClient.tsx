@@ -1,6 +1,7 @@
 //app/lessons/LessonsListClient.tsx
 'use client';
 import Link from "next/link";
+import AdminOnly from "../components/AdminOnly";
 import { apiSlice } from "../lib/features/api/apiSlice";
 
 export default function LessonsListClient() {
@@ -34,12 +35,14 @@ export default function LessonsListClient() {
                         <p className="text-gray-600 text-sm mb-4 line-clamp-3">{lesson.description}</p>
                         <p className="text-gray-600 text-sm mb-4 line-clamp-3">{lesson.activity?.name}</p>
                         <div className='flex gap-3 justify-end'>
+                            <AdminOnly>
                             <Link
                                 href={`/lessons/${lesson.id}/edit`}
                                 className="inline-block bg-gray-100 border-green-600 border hover:border-2 text-white px-2 py-2 rounded-lg transition duration-300"
                             >
                                 📝
                             </Link>
+                            </AdminOnly>
                         </div>
                     </div>
                 </div>

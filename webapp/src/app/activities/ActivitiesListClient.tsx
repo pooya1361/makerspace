@@ -2,6 +2,7 @@
 'use client';
 
 import Link from 'next/link';
+import AdminOnly from '../components/AdminOnly';
 import { apiSlice } from '../lib/features/api/apiSlice';
 
 export default function ActivitiesListClient() {
@@ -37,12 +38,14 @@ export default function ActivitiesListClient() {
                             <h4>Location: {activity.workshop ? activity.workshop.name : 'Not assigned'}</h4>
                         </p>
                         <div className='flex gap-3 justify-end'>
-                            <Link
-                                href={`/activities/${activity.id}/edit`}
-                                className="inline-block bg-gray-100 border-green-600 border hover:border-2 text-white px-2 py-2 rounded-lg transition duration-300"
-                            >
-                                📝
-                            </Link>
+                            <AdminOnly>
+                                <Link
+                                    href={`/activities/${activity.id}/edit`}
+                                    className="inline-block bg-gray-100 border-green-600 border hover:border-2 text-white px-2 py-2 rounded-lg transition duration-300"
+                                >
+                                    📝
+                                </Link>
+                            </AdminOnly>
                         </div>
                     </div>
                 </div>

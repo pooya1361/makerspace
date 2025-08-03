@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/activities")
 @Tag(name = "Activity management", description = "Endpoints for activity administration")
+@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 public class ActivityController {
     private final ActivityRepository activityRepository;
     private final ActivityService activityService;
@@ -41,6 +43,7 @@ public class ActivityController {
 
     @PostMapping
     @Operation(summary = "Add a activity", description = "Adds a activity to the system.")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPERADMIN')")
     public ResponseEntity<ActivityResponseDTO> createActivity(@Valid @RequestBody ActivityCreateDTO activityCreateDTO) {
         ActivityResponseDTO createdActivity = activityService.createActivity(activityCreateDTO);
         return new ResponseEntity<>(createdActivity, HttpStatus.CREATED);
@@ -57,6 +60,7 @@ public class ActivityController {
 
     @PatchMapping("/{id}")
     @Operation(summary = "Update an activity", description = "Updates an existing activity's information.")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPERADMIN')")
     public ResponseEntity<ActivityResponseDTO> updateActivity(@PathVariable Long id, @Valid @RequestBody ActivityCreateDTO updateDTO) {
         ActivityResponseDTO updatedActivity = activityService.updateActivity(id, updateDTO);
         return ResponseEntity.ok(updatedActivity);
@@ -65,6 +69,7 @@ public class ActivityController {
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete an activity", description = "Removes an activity from the system.")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPERADMIN')")
     public void deleteActivity(@PathVariable Long id) {
         activityService.deleteActivity(id);
     }

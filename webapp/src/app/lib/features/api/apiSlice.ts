@@ -125,6 +125,15 @@ export const apiSlice = createApi({
             }),
             invalidatesTags: ['Vote', 'ProposedTimeSlot', 'ScheduledLesson'],
         }),
+
+        deleteVote: builder.mutation<void, number>({
+            query: (id) => ({
+                url: `/api/votes/${id}`,
+                method: 'DELETE',
+            }),
+            invalidatesTags: (result, error, id) => ['ProposedTimeSlot', { type: 'ProposedTimeSlot', id }, 'ScheduledLesson', 'Vote'],
+        }),
+
         /**
          * ------------------------------------------------------------ Proposed time slot ------------------------------------------------------------
         */
@@ -167,7 +176,7 @@ export const apiSlice = createApi({
             providesTags: ['ScheduledLesson'], // Tag for caching
         }),
 
-        getScheduledLessonById: builder.query<ScheduledLessonResponseDTO, number>({
+        getScheduledLessonById: builder.query<ScheduledLessonResponseDTO, string>({
             query: (id) => `/api/scheduled-lessons/${id}`,
             transformResponse: (response: ScheduledLessonResponseDTO) => {
                 return {
@@ -345,6 +354,7 @@ export const {
 
     // Vote
     useAddVoteMutation,
+    useDeleteVoteMutation,
 
     // Proposed time slot
     useGetProposedTimeSlotByIdQuery,

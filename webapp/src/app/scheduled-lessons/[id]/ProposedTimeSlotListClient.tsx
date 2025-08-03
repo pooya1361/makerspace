@@ -1,21 +1,26 @@
 //app/scheduled-lessons/ProposedTimeSlotListClient.tsx
 'use client';
 
+import AdminOnly from "@/app/components/AdminOnly";
 import { ConfirmationPopup } from "@/app/components/ConfirmationPopup";
 import { ProposedTimeSlotSummaryDTO } from "@/app/interfaces/api";
-import { useAddProposedTimeSlotMutation, useDeleteProposedTimeSlotMutation, useGetScheduledLessonByIdQuery, useUpdateProposedTimeSlotMutation, useUpdateScheduledLessonMutation } from "@/app/lib/features/api/apiSlice";
+import { useAddProposedTimeSlotMutation, useAddVoteMutation, useDeleteProposedTimeSlotMutation, useDeleteVoteMutation, useGetScheduledLessonByIdQuery, useUpdateProposedTimeSlotMutation, useUpdateScheduledLessonMutation } from "@/app/lib/features/api/apiSlice";
+import { selectCurrentUser, selectIsAdmin } from "@/app/lib/features/auth/authSlice";
 import { isEqual } from "date-fns";
 import moment from "moment";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
 import ProposedTimeSlotPopup from "./ProposedTimeSlotPopup";
 
 interface ProposedTimeSlotListClientProps {
-    scheduledLessonId: number; // The ID passed from the Server Component
+    scheduledLessonId: string; // The ID passed from the Server Component
 }
 
 export default function ProposedTimeSlotListClient({ scheduledLessonId }: ProposedTimeSlotListClientProps) {
     const { data: scheduledLesson, isLoading, isError, error } = useGetScheduledLessonByIdQuery(scheduledLessonId);
+    const isAdmin = useSelector(selectIsAdmin);
+    const loggedInUser = useSelector(selectCurrentUser);
 
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
@@ -28,6 +33,8 @@ export default function ProposedTimeSlotListClient({ scheduledLessonId }: Propos
     const [updateProposedTimeSlot] = useUpdateProposedTimeSlotMutation();
     const [deleteProposedTimeSlot] = useDeleteProposedTimeSlotMutation();
     const [updateScheduledLesson] = useUpdateScheduledLessonMutation()
+    const [addVote] = useAddVoteMutation();
+    const [deleteVote] = useDeleteVoteMutation();
 
     const handleAddProposedSlot = () => {
         setSelectedSlot(undefined); // Clear any editing state
@@ -125,7 +132,7 @@ export default function ProposedTimeSlotListClient({ scheduledLessonId }: Propos
         try {
             if (!selectedSlot?.id) {
                 await addProposedTimeSlot({
-                    scheduledLessonId: scheduledLessonId,
+                    scheduledLessonId: Number(scheduledLessonId),
                     proposedStartTime: selectedDateTime
                 }).unwrap();
 
@@ -133,7 +140,7 @@ export default function ProposedTimeSlotListClient({ scheduledLessonId }: Propos
             } else {
                 await updateProposedTimeSlot({
                     id: selectedSlot!.id,
-                    scheduledLessonId: scheduledLessonId,
+                    scheduledLessonId: Number(scheduledLessonId),
                     proposedStartTime: selectedDateTime
                 }).unwrap();
             }
@@ -151,13 +158,23 @@ export default function ProposedTimeSlotListClient({ scheduledLessonId }: Propos
         if (!scheduledLesson?.proposedTimeSlots) {
             return [];
         }
+
+        // Sort by Proposed start time in voting mode (when lesson doesn't have a start time and user is not admin)
+        if (!scheduledLesson.startTime && !isAdmin) {
+            return [...scheduledLesson.proposedTimeSlots].sort((a, b) => {
+                const timeA = new Date(a.proposedStartTime).getTime();
+                const timeB = new Date(b.proposedStartTime).getTime();
+                return timeA - timeB;
+            });
+        }
+
         // Create a shallow copy before sorting to avoid mutating the original array
         return [...scheduledLesson.proposedTimeSlots].sort((a, b) => {
             const votesA = a.votes?.length ?? 0;
             const votesB = b.votes?.length ?? 0;
             return votesB - votesA; // Descending order (b - a)
         });
-    }, [scheduledLesson?.proposedTimeSlots]);
+    }, [isAdmin, scheduledLesson?.proposedTimeSlots, scheduledLesson?.startTime]);
 
     // --- Loading and Error States for Data Fetching ---
     if (isLoading) {
@@ -187,16 +204,31 @@ export default function ProposedTimeSlotListClient({ scheduledLessonId }: Propos
         );
     }
 
+
+    const handleToggleVote = (slotId: number, checked: boolean): void => {
+        if (checked) {
+            const voteId = sortedProposedTimeSlots.find(pts => pts.id === slotId)?.votes.find(v => v.user.id === loggedInUser?.id)?.id
+            deleteVote(voteId!)
+        } else {
+            addVote({
+                userId: loggedInUser!.id,
+                proposedTimeSlotId: slotId,
+            })
+        }
+    }
+
     return (
         <div className="">
             <div className="flex justify-between">
                 <h2 className="text-2xl text-gray-700 font-semibold mb-3">Proposed Time Slots</h2>
-                <button
-                    onClick={handleAddProposedSlot}
-                    className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition duration-300 mb-3"
-                >
-                    ✚ Propose a Time Slot
-                </button>
+                <AdminOnly>
+                    <button
+                        onClick={handleAddProposedSlot}
+                        className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition duration-300 mb-3"
+                    >
+                        ✚ Propose a Time Slot
+                    </button>
+                </AdminOnly>
             </div>
             {sortedProposedTimeSlots.length > 0 ? (
                 <div className="overflow-x-auto">
@@ -204,12 +236,18 @@ export default function ProposedTimeSlotListClient({ scheduledLessonId }: Propos
                         <thead className="bg-gray-100">
                             <tr>
                                 {scheduledLesson.startTime ?
-                                    <th className="py-2 px-4 border-b text-left text-sm font-medium text-gray-600 w-6"></th>
-                                    : undefined}
+                                    <th className="py-2 px-4 border-b text-left text-sm font-medium text-gray-600 w-30">Selected time</th>
+                                    : !isAdmin ?
+                                        <th className="py-2 px-4 border-b text-left text-sm font-medium text-gray-600 w-16">Select</th>
+                                        : undefined
+
+                                }
                                 <th className="py-2 px-4 border-b text-left text-sm font-medium text-gray-600">Start Time</th>
                                 <th className="py-2 px-4 border-b text-left text-sm font-medium text-gray-600">End Time</th>
                                 <th className="py-2 px-4 border-b text-left text-sm font-medium text-gray-600">Votes</th>
-                                <th className="py-2 px-4 border-b text-left text-sm font-medium text-gray-600"></th>
+                                <AdminOnly>
+                                    <th className="py-2 px-4 border-b text-left text-sm font-medium text-gray-600"></th>
+                                </AdminOnly>
                                 {/* Add other ProposedTimeSlot headers */}
                             </tr>
                         </thead>
@@ -223,11 +261,21 @@ export default function ProposedTimeSlotListClient({ scheduledLessonId }: Propos
                                 return (
                                     <tr key={slot.id} className="hover:bg-gray-50">
                                         {scheduledLesson.startTime ?
-                                            <td className="py-2 px-4 border-b text-sm text-gray-800">{
+                                            <td className="py-2 px-4 border-b text-sm text-gray-800 text-center">{
                                                 isEqual(scheduledLesson.startTime, slot.proposedStartTime) ?
                                                     <span title="Chosen proposed start time">✅</span>
-                                                    : undefined}</td>
-                                            : undefined}
+                                                    : undefined}
+                                            </td>
+                                            : !isAdmin ?
+                                                <td className="py-2 px-4 border-b text-sm text-gray-800 text-center">
+                                                    <input
+                                                        className="cursor-pointer"
+                                                        type="checkbox"
+                                                        checked={!!slot.votes.find(v => v.user.id === loggedInUser?.id)}
+                                                        onClick={() => handleToggleVote(slot.id, !!slot.votes.find(v => v.user.id === loggedInUser?.id))} />
+                                                </td>
+                                                : undefined
+                                        }
                                         <td className="py-2 px-4 border-b text-sm text-gray-800">
                                             {startTime ? moment(startTime).format('YYYY-MM-DD HH:mm') : 'N/A'}
                                         </td>
@@ -237,47 +285,49 @@ export default function ProposedTimeSlotListClient({ scheduledLessonId }: Propos
                                         <td className="py-2 px-4 border-b text-sm text-gray-800">
                                             <span className='flex align-middle'>{slot.votes?.length ?? 0}</span>
                                         </td>
-                                        <td className="py-2 px-4 border-b text-sm text-gray-800 text-end">
-                                            <Link
-                                                href={`/proposed-time-slots/${slot.id}/votes?scheduledLessonId=${scheduledLesson.id}`} // Link to the new votes page
-                                                className="ml-2 text-blue-500 hover:underline mr-1"
-                                            >
-                                                <button 
-                                                    className="rounded-md cursor-pointer p-1.5 border border-transparent text-center text-sm text-white transition-all shadow-sm hover:shadow focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none" 
-                                                    type="button"
-                                                    title="See the votes"
+                                        <AdminOnly>
+                                            <td className="py-2 px-4 border-b text-sm text-gray-800 text-end">
+                                                <Link
+                                                    href={`/proposed-time-slots/${slot.id}/votes?scheduledLessonId=${scheduledLesson.id}`} // Link to the new votes page
+                                                    className="ml-2 text-blue-500 hover:underline mr-1"
                                                 >
-                                                    🗳️
-                                                </button>
-                                            </Link>
-                                            {!scheduledLesson.startTime ?
-                                                <>
                                                     <button
-                                                        onClick={() => handleEditProposedSlot(slot)} // Pass the Date object
-                                                        className="rounded-md cursor-pointer p-1.5 border border-transparent text-center text-sm text-white transition-all shadow-sm hover:shadow focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none mr-1"
-                                                        disabled={!startTime} // Disable if startTime is null
-                                                        title="Update"
-                                                    >
-                                                        📝
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleDeleteProposedSlot(slot)} // Pass the Date object
-                                                        className="rounded-md cursor-pointer p-1.5 border border-transparent text-center text-sm text-white transition-all shadow-sm hover:shadow focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none mr-1"
-                                                        disabled={!startTime}
-                                                        title="Delete"
-                                                    >
-                                                        ❌
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleChooseProposedSlot(slot)} // Pass the Date object
                                                         className="rounded-md cursor-pointer p-1.5 border border-transparent text-center text-sm text-white transition-all shadow-sm hover:shadow focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-                                                        title="Choose as start time for this scheduled lesson"
+                                                        type="button"
+                                                        title="See the votes"
                                                     >
-                                                        ✅
+                                                        🗳️
                                                     </button>
-                                                </> : undefined
-                                            }
-                                        </td>
+                                                </Link>
+                                                {!scheduledLesson.startTime ?
+                                                    <>
+                                                        <button
+                                                            onClick={() => handleEditProposedSlot(slot)} // Pass the Date object
+                                                            className="rounded-md cursor-pointer p-1.5 border border-transparent text-center text-sm text-white transition-all shadow-sm hover:shadow focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none mr-1"
+                                                            disabled={!startTime} // Disable if startTime is null
+                                                            title="Update"
+                                                        >
+                                                            📝
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDeleteProposedSlot(slot)} // Pass the Date object
+                                                            className="rounded-md cursor-pointer p-1.5 border border-transparent text-center text-sm text-white transition-all shadow-sm hover:shadow focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none mr-1"
+                                                            disabled={!startTime}
+                                                            title="Delete"
+                                                        >
+                                                            ❌
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleChooseProposedSlot(slot)} // Pass the Date object
+                                                            className="rounded-md cursor-pointer p-1.5 border border-transparent text-center text-sm text-white transition-all shadow-sm hover:shadow focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                                                            title="Choose as start time for this scheduled lesson"
+                                                        >
+                                                            ✅
+                                                        </button>
+                                                    </> : undefined
+                                                }
+                                            </td>
+                                        </AdminOnly>
                                     </tr>
                                 );
                             })}

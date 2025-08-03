@@ -1,36 +1,63 @@
 // webapp/src/app/activities/[id]/edit/page.tsx
-// This is a Server Component - NO 'use client' at the top
+'use client';
 
-import { makeStore } from '@/app/lib/store';
-import { apiSlice } from '@/app/lib/features/api/apiSlice';
-import { notFound } from 'next/navigation'; // For handling workshop not found
 import ActivityForm from '@/app/components/ActivityForm';
+import { useGetActivityByIdQuery } from '@/app/lib/features/api/apiSlice';
+import { selectIsLoggedIn } from '@/app/lib/features/auth/authSlice';
+import Link from 'next/link';
+import { notFound, useParams } from 'next/navigation'; // For handling workshop not found
+import { useSelector } from 'react-redux';
 
 type EditActivityPageProps = {
-    params: {
-        id: string; // The ID from the URL segment [id]
-    };
+    id: string; // The ID from the URL segment [id]
 };
 
-export default async function EditActivityPage({ params: paramPromise }: EditActivityPageProps) {
-    const params = await paramPromise
+export default function EditActivityPage() {
+    const params = useParams<EditActivityPageProps>();
     const activityId = params.id;
+    const isLoggedIn = useSelector(selectIsLoggedIn);
 
-    // Fetch the activity data on the server
-    const { data: activity, isError, error } = await makeStore().dispatch(
-        apiSlice.endpoints.getActivityById.initiate(activityId)
-    );
+    const { data: activity, isLoading, isError, error } = useGetActivityByIdQuery(activityId, {
+        skip: !isLoggedIn || !activityId, // Skip if not logged in or no ID
+    });
 
-    if (isError || !activity) {
-        console.error(`Error fetching activity ${activityId}:`, error);
-        // Use Next.js notFound() to render the not-found page
-        // This is better for SEO than just rendering an error message
+    if (!isLoggedIn) {
+        return (
+            <div className="container mx-auto p-6 md:p-10 text-center">
+                <h1 className="text-4xl font-bold text-red-800 mb-8">Access Denied</h1>
+                <p className="text-lg text-gray-700">Please log in to edit activities.</p>
+                <Link href="/login" className="mt-4 inline-block text-indigo-600 hover:text-indigo-800">
+                    Go to Login
+                </Link>
+            </div>
+        );
+    }
+
+    if (isLoading) {
+        return (
+            <div className="container mx-auto p-6 md:p-10 text-center">
+                <h1 className="text-4xl font-bold text-blue-800 mb-8">Loading Activity...</h1>
+                <p className="text-lg text-gray-700">Please wait while we fetch the activity details.</p>
+            </div>
+        );
+    }
+
+    if (isError) {
+        console.error(`Error fetching activity ${activityId} (Client Component):`, error);
+        return (
+            <div className="container mx-auto p-6 md:p-10 text-center">
+                <h1 className="text-4xl font-bold text-red-800 mb-8">Error Loading Activity</h1>
+                <p className="text-lg text-gray-700">There was a problem fetching the activity. Please try again.</p>
+            </div>
+        );
+    }
+
+    if (!activity) {
         notFound();
     }
 
     return (
         <div className="container mx-auto p-6 md:p-10">
-            <h1 className="text-4xl font-bold text-blue-800 mb-8 text-center">Edit Activity</h1>
             <ActivityForm initialActivity={activity} />
         </div>
     );

@@ -78,7 +78,9 @@ public class JwtService {
      * @return The generated JWT string.
      */
     public String generateToken(User user) {
-        return generateToken(new HashMap<>(), user);
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("userType", user.getUserType().name());
+        return generateToken(claims, user);
     }
 
     /**

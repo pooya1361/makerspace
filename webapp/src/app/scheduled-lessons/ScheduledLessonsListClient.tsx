@@ -2,6 +2,7 @@
 'use client';
 import moment from "moment";
 import Link from "next/link";
+import AdminOnly from "../components/AdminOnly";
 import { apiSlice } from "../lib/features/api/apiSlice";
 
 export default function ScheduledLessonsListClient() {
@@ -48,12 +49,14 @@ export default function ScheduledLessonsListClient() {
                             >
                                 View Details
                             </Link>
-                            <Link
-                                href={`/scheduled-lessons/${scheduledLesson.id}/edit`}
-                                className="inline-block bg-gray-100 border-orange-600 border hover:border-2 text-white px-2 py-2 rounded-lg transition duration-300"
-                            >
-                                📝
-                            </Link>
+                            <AdminOnly>
+                                <Link
+                                    href={`/scheduled-lessons/${scheduledLesson.id}/edit`}
+                                    className="inline-block bg-gray-100 border-orange-600 border hover:border-2 text-white px-2 py-2 rounded-lg transition duration-300"
+                                >
+                                    📝
+                                </Link>
+                            </AdminOnly>
                         </div>
                     </div>
                 </div>
