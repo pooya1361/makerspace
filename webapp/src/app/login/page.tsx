@@ -22,7 +22,6 @@ export default function LoginPage() {
         try {
             await login({ email, password }).unwrap();
 
-            console.log('Login successful! Token stored.');
             router.push('/'); 
             router.refresh()
         } catch (err: any) { 

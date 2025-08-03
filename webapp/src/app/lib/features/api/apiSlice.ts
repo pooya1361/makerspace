@@ -1,5 +1,5 @@
 // webapp/src/lib/features/api/apiSlice.ts
-import { ActivityCreateDTO, ActivityResponseDTO, Lesson, LessonCreateDTO, LessonResponseDTO, ProposedTimeSlotCreateDTO, ProposedTimeSlotResponseDTO, ScheduledLessonCreateDTO, ScheduledLessonResponseDTO, SummaryResponseDTO, UserResponseDTO, VoteCreateDTO, VoteResponseDTO, WorkshopCreateDTO, WorkshopResponseDTO } from '@/app/interfaces/api'; // Adjust path as needed
+import { ActivityCreateDTO, ActivityResponseDTO, Lesson, LessonCreateDTO, LessonResponseDTO, ProposedTimeSlotCreateDTO, ProposedTimeSlotResponseDTO, ScheduledLessonCreateDTO, ScheduledLessonResponseDTO, SummaryResponseDTO, UserCreateDTO, UserResponseDTO, VoteCreateDTO, VoteResponseDTO, WorkshopCreateDTO, WorkshopResponseDTO } from '@/app/interfaces/api'; // Adjust path as needed
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { logout as authLogout, logout, setCredentials, startLogout } from '../auth/authSlice';
 
@@ -71,6 +71,7 @@ export const apiSlice = createApi({
             query: () => ({
                 url: '/api/auth/logout',
                 method: 'POST',
+                responseHandler: 'text'
             }),
             async onQueryStarted(_, { dispatch, queryFulfilled }) {
                 // Set logout flag immediately to prevent auth checks
@@ -87,6 +88,14 @@ export const apiSlice = createApi({
                     dispatch(apiSlice.util.resetApiState());
                 }
             },
+        }),
+
+        register: builder.mutation<UserResponseDTO, Omit<UserCreateDTO, 'id'>>({
+            query: (userData) => ({
+                url: '/api/auth/register',
+                method: 'POST',
+                body: userData,
+            }),
         }),
 
         // Get current user info (for auth check on page load)
@@ -329,6 +338,7 @@ export const apiSlice = createApi({
 export const {
     useLoginMutation,
     useLogoutMutation,
+    useRegisterMutation,
     useGetCurrentUserQuery,
     useGetOverallSummaryQuery,
     useGetUsersQuery,
