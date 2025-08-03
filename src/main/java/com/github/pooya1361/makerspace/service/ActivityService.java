@@ -2,6 +2,7 @@ package com.github.pooya1361.makerspace.service;
 
 import com.github.pooya1361.makerspace.dto.create.ActivityCreateDTO;
 import com.github.pooya1361.makerspace.dto.response.ActivityResponseDTO;
+import com.github.pooya1361.makerspace.dto.response.WorkshopResponseDTO;
 import com.github.pooya1361.makerspace.mapper.ActivityMapper;
 import com.github.pooya1361.makerspace.model.Activity;
 import com.github.pooya1361.makerspace.model.Workshop;
@@ -11,6 +12,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -25,6 +27,10 @@ public class ActivityService {
         this.workshopRepository = workshopRepository;
         this.activityRepository = activityRepository;
         this.activityMapper = activityMapper;
+    }
+
+    public List<ActivityResponseDTO> getAllActivities() {
+        return activityMapper.toDtoList(activityRepository.findAll());
     }
 
     @Transactional

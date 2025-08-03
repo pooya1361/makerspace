@@ -12,8 +12,8 @@ import lombok.AllArgsConstructor;
 public class UserResponseDTO {
 
     private Long id;
-    private String email;
     private String firstName;
     private String lastName;
+    private String email;
     private UserType userType;
 }

@@ -23,6 +23,7 @@ import com.github.pooya1361.makerspace.security.JwtService; // Your JwtService
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor; // Make sure Lombok is imported
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -77,7 +78,7 @@ public class AuthenticationController {
         cookie.setHttpOnly(true); // Prevents client-side JavaScript access
         cookie.setPath("/"); // Makes the cookie available across the entire application
         cookie.setMaxAge(7 * 24 * 60 * 60); // e.g., 7 days in seconds. IMPORTANT: Match JWT expiration!
-        cookie.setSecure(true);
+        cookie.setSecure(false);
         response.addCookie(cookie);
 
         AuthenticationResponse loginResponse = new AuthenticationResponse();
@@ -110,7 +111,10 @@ public class AuthenticationController {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
         User user = userRepository.findByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found after authentication")); // Should not happen if authentication succeeded
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.INTERNAL_SERVER_ERROR,
+                        "User not found after authentication"
+                ));
 
         AuthenticationResponse loginResponse = new AuthenticationResponse();
         loginResponse.setUser(userMapper.toDto(user));

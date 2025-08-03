@@ -22,23 +22,20 @@ import java.util.List;
 @Tag(name = "Activity management", description = "Endpoints for activity administration")
 @CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 public class ActivityController {
-    private final ActivityRepository activityRepository;
     private final ActivityService activityService;
 
     @Autowired
     private ActivityMapper activityMapper;
 
     @Autowired // Spring automatically injects ActivityRepository
-    public ActivityController(ActivityRepository activityRepository, ActivityService activityService) {
-        this.activityRepository = activityRepository;
+    public ActivityController(ActivityService activityService) {
         this.activityService = activityService;
     }
 
     @GetMapping()
     public ResponseEntity<List<ActivityResponseDTO>> getActivities() {
-        List<Activity> activities = activityRepository.findAll();
-        List<ActivityResponseDTO> activityResponseDTOs = activityMapper.toDtoList(activities);
-        return new ResponseEntity<>(activityResponseDTOs, HttpStatus.OK);
+        List<ActivityResponseDTO> activities = activityService.getAllActivities();
+        return new ResponseEntity<>(activities, HttpStatus.OK);
     }
 
     @PostMapping

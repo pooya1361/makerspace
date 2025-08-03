@@ -19,12 +19,10 @@ import java.util.List;
 @RequestMapping("/api/workshops")
 @Tag(name = "Workshop management", description = "Endpoints for workshop administration. A workshop is where an activity takes place.")
 public class WorkshopController {
-    private final WorkshopRepository workshopRepository;
     private final WorkshopService workshopService;
 
     @Autowired // Spring automatically injects WorkshopRepository
-    public WorkshopController(WorkshopRepository workshopRepository, WorkshopService workshopService) {
-        this.workshopRepository = workshopRepository;
+    public WorkshopController(WorkshopService workshopService) {
         this.workshopService = workshopService;
     }
 
