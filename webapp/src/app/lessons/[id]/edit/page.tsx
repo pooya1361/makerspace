@@ -1,15 +1,15 @@
 // webapp/src/app/lessons/[id]/edit/page.tsx
 // This is a Server Component - NO 'use client' at the top
 
-import { makeStore } from '@/app/lib/store';
-import { apiSlice } from '@/app/lib/features/api/apiSlice';
-import { notFound } from 'next/navigation'; // For handling workshop not found
 import LessonForm from '@/app/components/LessonForm';
+import { apiSlice } from '@/app/lib/features/api/apiSlice';
+import { makeStore } from '@/app/lib/store';
+import { notFound } from 'next/navigation'; // For handling workshop not found
 
 type EditLessonPageProps = {
-    params: {
-        id: string; // The ID from the URL segment [id]
-    };
+    params: Promise<{
+        id: string;
+    }>;
 };
 
 export default async function EditLessonPage({ params: paramPromise }: EditLessonPageProps) {

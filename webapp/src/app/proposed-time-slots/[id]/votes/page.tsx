@@ -5,8 +5,12 @@ import Link from 'next/link';
 import VotesListClient from './VotesListClient';
 
 interface ProposedTimeSlotVotesPageProps {
-    params: { id: string };
-    searchParams: { scheduledLessonId?: string }; // Query parameters are strings, optional
+    params: Promise<{
+        id: string;
+    }>;
+    searchParams: Promise<{ 
+        scheduledLessonId?: string 
+    }>; 
 }
 
 // This is an async Server Component function

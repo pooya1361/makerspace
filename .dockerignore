@@ -1,0 +1,35 @@
+# Maven
+target/
+.mvn/
+mvnw
+mvnw.cmd
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Next.js frontend (separate deployment)
+webapp/
+node_modules/
+
+# Logs
+*.log
+
+# Docker
+Dockerfile
+.dockerignore
+
+# Documentation
+README.md
+*.md

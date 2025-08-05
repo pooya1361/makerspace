@@ -7,9 +7,9 @@ import { makeStore } from '@/app/lib/store';
 import { notFound } from 'next/navigation'; // For handling workshop not found
 
 type EditScheduledLessonPageProps = {
-    params: {
-        id: string; // The ID from the URL segment [id]
-    };
+    params: Promise<{
+        id: string;
+    }>;
 };
 
 export default async function EditScheduledLessonPage({ params: paramPromise }: EditScheduledLessonPageProps) {

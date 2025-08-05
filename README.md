@@ -163,6 +163,14 @@ makerspace/
 
 ---
 
+## Demo Accounts
+For demonstration purposes, the following accounts are available:
+- **Student**: demo.student@makerspace.com / DemoPass2024!
+- **Instructor**: demo.instructor@makerspace.com / DemoPass2024!
+- **Admin**: demo.admin@makerspace.com / DemoPass2024!
+
+*Note: Demo users are only created in development/demo environments*
+
 ## License
 
 *(Add your license information here)*
