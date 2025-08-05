@@ -1,8 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Use standalone output for better Amplify compatibility
-  output: 'standalone',
-
   // Disable image optimization for static hosting
   images: {
     unoptimized: true
@@ -10,6 +7,13 @@ const nextConfig = {
 
   // Handle trailing slashes
   trailingSlash: true,
+
+  // Ensure static generation where possible
+  experimental: {
+    outputFileTracingIncludes: {
+      '/*': ['./public/**/*'],
+    },
+  },
 }
 
 module.exports = nextConfig
