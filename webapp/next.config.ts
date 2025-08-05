@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Disable image optimization for static hosting
+  // Enable static export for Amplify
+  output: 'export',
+
+  // Disable image optimization for static export  
   images: {
     unoptimized: true
   },
@@ -8,12 +11,10 @@ const nextConfig = {
   // Handle trailing slashes
   trailingSlash: true,
 
-  // Ensure static generation where possible
+  // Disable server-side features that don't work with export
   experimental: {
-    outputFileTracingIncludes: {
-      '/*': ['./public/**/*'],
-    },
-  },
+    appDir: true
+  }
 }
 
 module.exports = nextConfig
