@@ -1,7 +1,21 @@
-import type { NextConfig } from "next";
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  // Enable static exports for Amplify
+  output: 'export',
 
-const nextConfig: NextConfig = {
-  /* config options here */
-};
+  // Disable image optimization for static export
+  images: {
+    unoptimized: true
+  },
 
-export default nextConfig;
+  // Handle trailing slashes
+  trailingSlash: true,
+
+  // Base path (leave empty for root deployment)
+  basePath: '',
+
+  // Asset prefix (leave empty for default)
+  assetPrefix: '',
+}
+
+module.exports = nextConfig
