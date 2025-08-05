@@ -1,8 +1,7 @@
 /* globals.css */
-/* CORRECTED: Import Tailwind CSS layers explicitly */
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
   --background: #ffffff;
