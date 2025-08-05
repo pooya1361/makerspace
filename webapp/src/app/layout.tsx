@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Roboto_Mono } from "next/font/google";
 import AuthStatusWatcher from "./components/AuthStatusWatcher";
 import Header from "./components/Header";
 import { SimpleAuthChecker } from "./components/SimpleAuthChecker";
@@ -7,13 +7,13 @@ import WelcomeRibbon from "./components/WelcomeRibbon";
 import "./globals.css";
 import { ReduxProvider } from "./lib/provider";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-sans",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const robotoMono = Roboto_Mono({
+  variable: "--font-mono",
   subsets: ["latin"],
 });
 
@@ -31,7 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${inter.variable} ${robotoMono.variable} antialiased`}
       >
         <ReduxProvider>
           <Header />

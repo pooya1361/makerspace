@@ -87,8 +87,8 @@ export default function ProposedTimeSlotListClient({ scheduledLessonId }: Propos
     }
 
     useEffect(() => {
-        if (!!action) {
-            if (!!selectedSlot) {
+        if (action) {
+            if (selectedSlot) {
                 // action = UPDATE | DELETE
                 switch (action) {
                     case "UPDATE":
@@ -271,8 +271,8 @@ export default function ProposedTimeSlotListClient({ scheduledLessonId }: Propos
                                                     <input
                                                         className="cursor-pointer"
                                                         type="checkbox"
-                                                        checked={!!slot.votes.find(v => v.user.id === loggedInUser?.id)}
-                                                        onClick={() => handleToggleVote(slot.id, !!slot.votes.find(v => v.user.id === loggedInUser?.id))} />
+                                                        checked={slot.votes.findIndex(v => v.user.id === loggedInUser?.id) > -1}
+                                                        onClick={() => handleToggleVote(slot.id, slot.votes.findIndex(v => v.user.id === loggedInUser?.id) > -1)} />
                                                 </td>
                                                 : undefined
                                         }

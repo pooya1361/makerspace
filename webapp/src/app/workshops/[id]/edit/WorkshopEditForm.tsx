@@ -1,16 +1,16 @@
 // webapp/src/app/workshops/[id]/edit/WorkshopEditForm.tsx
 'use client'; // This must be a Client Component
 
-import { useState, useEffect, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import {
-    useUpdateWorkshopMutation,
-    useDeleteWorkshopMutation,
-    useGetActivitiesQuery
-} from '@/app/lib/features/api/apiSlice';
 import { revalidateWorkshopsPath } from '@/app/actions'; // Your Server Action for revalidation
 import { WorkshopResponseDTO } from '@/app/interfaces/api'; // Assuming you have this interface
+import {
+    useDeleteWorkshopMutation,
+    useGetActivitiesQuery,
+    useUpdateWorkshopMutation
+} from '@/app/lib/features/api/apiSlice';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
 
 type WorkshopEditFormProps = {
     initialWorkshop: WorkshopResponseDTO;
@@ -202,7 +202,7 @@ export default function WorkshopEditForm({ initialWorkshop }: WorkshopEditFormPr
                                             value={activity.id.toString()}
                                             checked={selectedActivityIds.includes(activity.id)}
                                             onChange={() => handleActivityChange(activity.id)}
-                                            disabled={!!activity.workshop && activity.workshop.id != initialWorkshop.id}
+                                            disabled={activity.workshop && activity.workshop.id != initialWorkshop.id}
                                         />
                                         <span className="ml-2 text-gray-700">{activity.name}</span>
                                     </label>

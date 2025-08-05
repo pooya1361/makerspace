@@ -160,7 +160,7 @@ export default function ScheduledLessonForm({ initialScheduledLesson }: Schedule
             )}
 
             <form onSubmit={handleSubmit}>
-                {!!startTime ?
+                {startTime ?
                     <div className="mb-4">
                         <label htmlFor="name" className="block text-gray-700 text-sm font-bold mb-2">
                             Scheduled start time:
