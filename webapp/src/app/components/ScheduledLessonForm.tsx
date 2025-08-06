@@ -1,4 +1,4 @@
-// webapp/src/app/Lessons/[id]/edit/LessonEditForm.tsx or a new path like /components/LessonForm.tsx
+//components/ScheduledLessonForm.tsx
 'use client';
 
 import { ScheduledLessonCreateDTO, ScheduledLessonResponseDTO } from '@/app/interfaces/api';
@@ -64,11 +64,6 @@ export default function ScheduledLessonForm({ initialScheduledLesson }: Schedule
         e.preventDefault();
         setErrorMessage('');
         setSuccessMessage('');
-
-        if (!startTime) {
-            setErrorMessage('Start time is required.'); // Be more specific
-            return;
-        }
 
         if (!instructorId) {
             setErrorMessage('Instructor is required.'); // Be more specific
