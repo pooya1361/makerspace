@@ -1,10 +1,29 @@
 # Makerspace Project
 
-This project, "Makerspace," is a full-stack application designed to manage scheduled lessons, proposed time slots, and user interactions with comprehensive authentication and authorization. It demonstrates a modern technology stack for both the backend and frontend with robust security and testing practices.
+🚀 **Live Demo**: [https://master.d31o1td403e37h.amplifyapp.com](https://master.d31o1td403e37h.amplifyapp.com)
+
+📊 **API Documentation**: [Backend Swagger UI](https://d10bevpih9tc2u.cloudfront.net/swagger-ui.html)
+
+This project, "Makerspace," is a full-stack application designed to manage scheduled lessons, proposed time slots, and user interactions with comprehensive authentication and authorization. It demonstrates a modern technology stack deployed on **AWS** with robust security and testing practices.
 
 ---
 
-## Technologies Used
+## 🌟 Live Deployment
+
+**Architecture Overview:**
+- **Frontend**: Next.js deployed on **AWS Amplify** with HTTPS
+- **Backend**: Spring Boot deployed on **AWS Elastic Beanstalk**
+- **Database**: PostgreSQL on **AWS RDS**
+- **Domain**: Custom SSL certificates and load balancing
+
+### Demo Accounts
+Test the live application with these accounts:
+- **Test**: `test@makerspace.com` / `test`
+- **Admin**: `admin@makerspace.com` / `!Admin`
+
+---
+
+## 🛠️ Technologies Used
 
 ### Backend (Java/Spring Boot)
 
@@ -18,6 +37,16 @@ This project, "Makerspace," is a full-stack application designed to manage sched
 * **MapStruct 1.6.2**: An annotation-based code generator that greatly simplifies the implementation of mapping interfaces between Java bean types (e.g., converting Entities to DTOs and vice-versa). Reduces manual mapping code and potential errors.
 * **SpringDoc OpenAPI 2.8.5 (Swagger UI)**: Automatically generates API documentation and provides an interactive UI for testing REST endpoints. Enhances API discoverability and simplifies collaboration.
 
+### Frontend (Next.js/React)
+
+* **Next.js 15**: A React framework for building full-stack web applications. Provides features like server-side rendering (SSR), static site generation (SSG), and API routes, optimizing performance and developer experience.
+* **React**: A declarative, component-based JavaScript library for building user interfaces. Simplifies the creation of interactive and reusable UI components.
+* **TypeScript**: A typed superset of JavaScript that compiles to plain JavaScript. Enhances code quality, readability, and maintainability by catching errors at compile time.
+* **Tailwind CSS**: A utility-first CSS framework. Enables rapid UI development by providing low-level utility classes directly in your JSX, reducing the need for custom CSS.
+* **Redux Toolkit (RTK)**: The official, opinionated, batteries-included toolset for efficient Redux development. Simplifies Redux setup and common tasks.
+* **RTK Query**: A powerful data fetching and caching tool built on top of Redux Toolkit. Greatly reduces boilerplate for API interactions, provides automatic caching, revalidation, and handles loading/error states.
+* **`cz.habarta.typescript-generator-maven-plugin`**: A Maven plugin used to automatically generate TypeScript interfaces (e.g., from Java DTOs). Ensures type safety and consistency between frontend and backend data models.
+
 ### Testing Framework
 
 * **JUnit 5**: Modern testing framework for Java applications with improved annotations, assertions, and test lifecycle management.
@@ -27,29 +56,27 @@ This project, "Makerspace," is a full-stack application designed to manage sched
 * **H2 Database**: In-memory database used for testing environments, providing fast and isolated test execution.
 * **Spring Security Test**: Testing utilities for security-related functionality including authentication and authorization testing.
 
-### Authentication & Security
+### Cloud Infrastructure (AWS)
+
+* **AWS Amplify**: Frontend hosting with automatic CI/CD from GitHub, HTTPS certificates, and global CDN
+* **AWS Elastic Beanstalk**: Backend application hosting with auto-scaling, load balancing, and health monitoring
+* **Amazon RDS (PostgreSQL)**: Managed relational database service with automated backups and security
+* **AWS VPC**: Virtual private cloud with proper security groups and network configuration
+
+---
+
+## 🔐 Authentication & Security
 
 * **JWT Authentication**: Stateless authentication using JSON Web Tokens
 * **HTTP-Only Cookies**: Secure token storage preventing XSS attacks
-* **Role-Based Access Control**: User roles and permissions management
+* **Role-Based Access Control**: User roles and permissions management (Student, Instructor, Admin)
 * **Password Encryption**: Secure password hashing using Spring Security's password encoders
 * **CORS Configuration**: Cross-Origin Resource Sharing setup for frontend-backend communication
+* **HTTPS Encryption**: SSL/TLS certificates for secure data transmission
 
 ---
 
-### Frontend (Next.js/React)
-
-* **Next.js**: A React framework for building full-stack web applications. Provides features like server-side rendering (SSR), static site generation (SSG), and API routes, optimizing performance and developer experience.
-* **React**: A declarative, component-based JavaScript library for building user interfaces. Simplifies the creation of interactive and reusable UI components.
-* **TypeScript**: A typed superset of JavaScript that compiles to plain JavaScript. Enhances code quality, readability, and maintainability by catching errors at compile time.
-* **Tailwind CSS**: A utility-first CSS framework. Enables rapid UI development by providing low-level utility classes directly in your JSX, reducing the need for custom CSS.
-* **Redux Toolkit (RTK)**: The official, opinionated, batteries-included toolset for efficient Redux development. Simplifies Redux setup and common tasks.
-* **RTK Query**: A powerful data fetching and caching tool built on top of Redux Toolkit. Greatly reduces boilerplate for API interactions, provides automatic caching, revalidation, and handles loading/error states.
-* **`cz.habarta.typescript-generator-maven-plugin`**: A Maven plugin used to automatically generate TypeScript interfaces (e.g., from Java DTOs). Ensures type safety and consistency between frontend and backend data models.
-
----
-
-## API Endpoints
+## 📚 API Endpoints
 
 ### Authentication Endpoints
 - `POST /api/auth/register` - User registration
@@ -57,13 +84,19 @@ This project, "Makerspace," is a full-stack application designed to manage sched
 - `POST /api/auth/logout` - User logout (clears authentication cookie)
 - `GET /api/auth/me` - Get current authenticated user information
 
+### Business Logic Endpoints
+- **Lessons Management**: CRUD operations for lesson scheduling
+- **User Management**: User profiles and role management
+- **Workshop Management**: Workshop creation and enrollment
+- **Time Slot Management**: Available time slot management and voting
+
 ### API Documentation
-- **Swagger UI**: Available at `http://localhost:8080/swagger-ui.html`
-- **OpenAPI JSON**: Available at `http://localhost:8080/v3/api-docs`
+- **Live Swagger UI**: [Backend API Docs](https://d10bevpih9tc2u.cloudfront.net/swagger-ui.html)
+- **OpenAPI JSON**: Available at `/v3/api-docs`
 
 ---
 
-## Testing
+## 🧪 Testing
 
 The project includes comprehensive testing coverage:
 
@@ -79,7 +112,7 @@ mvn test
 
 ---
 
-## Getting Started
+## 🚀 Local Development
 
 ### Prerequisites
 - **Java 21** or higher
@@ -132,7 +165,7 @@ The frontend will be available at `http://localhost:3000`
 
 ---
 
-## Project Structure
+## 📁 Project Structure
 
 ```
 makerspace/
@@ -152,29 +185,62 @@ makerspace/
 
 ---
 
-## Security Features
+## 🏗️ Deployment Architecture
 
-- **JWT Token Authentication**: Stateless authentication with secure token generation
-- **HTTP-Only Cookies**: Prevents XSS attacks by storing tokens in HTTP-only cookies
-- **Password Encryption**: BCrypt password hashing
-- **CORS Configuration**: Properly configured for frontend-backend communication
-- **Role-Based Access Control**: Support for different user roles and permissions
-- **Security Testing**: Comprehensive security test coverage
+```
+┌─────────────────┐    HTTPS     ┌─────────────────┐
+│   AWS Amplify   │◄─────────────┤     Users       │
+│   (Frontend)    │              │   (Browsers)    │
+└─────────┬───────┘              └─────────────────┘
+          │
+          │ HTTPS API Calls
+          ▼
+┌─────────────────┐              ┌─────────────────┐
+│ Elastic         │◄─────────────┤ Application     │
+│ Beanstalk       │              │ Load Balancer   │
+│ (Spring Boot)   │              │ (HTTPS/HTTP)    │
+└─────────┬───────┘              └─────────────────┘
+          │
+          │ PostgreSQL Protocol
+          ▼
+┌─────────────────┐              ┌─────────────────┐
+│   Amazon RDS    │◄─────────────┤   VPC Security  │
+│  (PostgreSQL)   │              │     Groups      │
+└─────────────────┘              └─────────────────┘
+```
 
 ---
 
-## Demo Accounts
-For demonstration purposes, the following accounts are available:
-- **Student**: demo.student@makerspace.com / DemoPass2024!
-- **Instructor**: demo.instructor@makerspace.com / DemoPass2024!
-- **Admin**: demo.admin@makerspace.com / DemoPass2024!
+## 🎯 Features Demonstrated
 
-*Note: Demo users are only created in development/demo environments*
+- **Full-Stack Development**: Complete application from database to user interface
+- **RESTful API Design**: Proper HTTP methods, status codes, and resource modeling
+- **Authentication & Authorization**: JWT-based security with role-based access control
+- **Database Integration**: Complex relationships and queries with PostgreSQL
+- **Cloud Deployment**: Production-ready deployment on AWS with proper scaling
+- **Modern Frontend**: React with TypeScript, Redux state management, and responsive design
+- **Testing**: Comprehensive test suite with unit and integration tests
+- **API Documentation**: Auto-generated interactive documentation with Swagger
+- **Security Best Practices**: HTTPS, password hashing, CORS, and secure cookie handling
 
-## License
+---
 
-*(Add your license information here)*
+## 📈 Performance & Scalability
 
-## Contributing
+- **Auto-scaling**: Elastic Beanstalk automatically scales based on traffic
+- **Database Performance**: RDS with proper indexing and connection pooling
+- **CDN**: Amplify provides global content delivery for frontend assets
+- **Caching**: Redux Toolkit Query provides intelligent client-side caching
+- **Load Balancing**: Application Load Balancer distributes traffic across instances
 
-*(Add contributing guidelines here)*
+---
+
+## 👨‍💻 Developer
+
+**Pouya Mahpeikar**  
+Full-Stack Developer  
+[GitHub](https://github.com/pooya1361) | [LinkedIn](https://www.linkedin.com/in/pouya-mahpeikar-2b473a53/) | [Portfolio](#)
+
+---
+
+*This project showcases modern full-stack development practices, cloud deployment expertise, and production-ready software engineering skills.*
