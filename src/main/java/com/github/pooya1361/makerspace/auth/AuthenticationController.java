@@ -1,6 +1,8 @@
 package com.github.pooya1361.makerspace.auth; // Adjust package
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,6 +26,11 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor; // Make sure Lombok is imported
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.core.env.Environment;
+import org.springframework.beans.factory.annotation.Value;
+
+import java.util.Arrays;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -35,6 +42,9 @@ public class AuthenticationController {
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
+
+    @Value("${spring.profiles.active:}")
+    private String activeProfile;
 
     // Register method (example, ensure it's present in your code)
     @PostMapping("/register")
@@ -59,6 +69,7 @@ public class AuthenticationController {
     @PostMapping("/login")
     public ResponseEntity<AuthenticationResponse> authenticate(
             @RequestBody AuthenticationRequest request,
+            HttpServletRequest servletRequest,
             HttpServletResponse response // Inject HttpServletResponse here
     ) {
         Authentication authentication = authenticationManager.authenticate(
@@ -74,12 +85,19 @@ public class AuthenticationController {
                 .orElseThrow(() -> new RuntimeException("User not found after authentication")); // Should not happen if authentication succeeded
         String jwtToken = jwtService.generateToken(user);
 
-        Cookie cookie = new Cookie("accessToken", jwtToken); // "accessToken" is the name of your cookie
-        cookie.setHttpOnly(true); // Prevents client-side JavaScript access
-        cookie.setPath("/"); // Makes the cookie available across the entire application
-        cookie.setMaxAge(7 * 24 * 60 * 60); // e.g., 7 days in seconds. IMPORTANT: Match JWT expiration!
-        cookie.setSecure(false);
-        response.addCookie(cookie);
+        boolean isSecure = Objects.equals(activeProfile, "prod");
+
+        ResponseCookie cookieBuilder = ResponseCookie.from("accessToken", jwtToken)
+                .httpOnly(true)
+                .path("/")
+                .maxAge(7 * 24 * 60 * 60)
+                .secure(isSecure)
+                .sameSite(isSecure ? "None" : "Lax")
+                .build();
+
+        System.out.println("Cookie: " + cookieBuilder.toString());
+        System.out.println("isSecure: " + isSecure);
+        response.addHeader("Set-Cookie", cookieBuilder.toString());
 
         AuthenticationResponse loginResponse = new AuthenticationResponse();
         loginResponse.setUser(userMapper.toDto(user));
@@ -89,14 +107,17 @@ public class AuthenticationController {
 
     // Logout endpoint to clear the cookie
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(HttpServletResponse response) {
-        Cookie cookie = new Cookie("accessToken", null); // Create a cookie with null value
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
-        cookie.setSecure(false);
-        response.addCookie(cookie);
+    public ResponseEntity<String> logout(HttpServletResponse response, HttpServletRequest servletRequest) {
+        boolean isSecure = servletRequest.isSecure();
+        ResponseCookie cookie = ResponseCookie.from("accessToken", "")
+                .httpOnly(true)
+                .secure(isSecure)
+                .sameSite("None")
+                .path("/")
+                .maxAge(0)
+                .build();
 
+        response.addHeader("Set-Cookie", cookie.toString());
         SecurityContextHolder.clearContext();
 
         return ResponseEntity.ok("Logged out successfully");

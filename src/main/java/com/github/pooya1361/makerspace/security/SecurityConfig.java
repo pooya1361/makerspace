@@ -124,7 +124,7 @@ public class SecurityConfig {
                 "http://localhost:3000",
                 "https://master.d31o1td403e37h.amplifyapp.com",
                 "https://d10bevpih9tc2u.cloudfront.net"
-                ));
+        ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);
