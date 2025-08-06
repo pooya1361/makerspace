@@ -120,7 +120,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000", "https://master.d31o1td403e37h.amplifyapp.com"));
+        configuration.setAllowedOrigins(List.of(
+                "http://localhost:3000",
+                "https://master.d31o1td403e37h.amplifyapp.com",
+                "https://d10bevpih9tc2u.cloudfront.net"
+                ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);
