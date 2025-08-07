@@ -17,8 +17,6 @@ const baseQuery = fetchBaseQuery({
     credentials: 'include',
     prepareHeaders: (headers) => {
         console.log('RTK Query: Making request with cookies');
-        console.log('Document cookies:', document?.cookie); // Add this
-        console.log('Headers being sent:', Object.fromEntries(headers.entries())); // Add this
         return headers;
     },
 });

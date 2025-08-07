@@ -137,7 +137,7 @@ export default function ScheduledLessonForm({ initialScheduledLesson }: Schedule
     };
 
     return (
-        <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-lg">
+        <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-lg text-gray-700">
             <h2 className="text-2xl font-bold mb-6 text-center">
                 {isEditMode ? 'Edit Scheduled Lesson' : 'Add New Scheduled Lesson'}
             </h2>
@@ -229,7 +229,7 @@ export default function ScheduledLessonForm({ initialScheduledLesson }: Schedule
                                     <option value={-1}>-- Select an instructor --</option> {/* Added a placeholder option */}
                                     {users.map(user => (
                                         <option key={user.id} value={user.id}>
-                                            {user.firstName} + {user.lastName}
+                                            {user.firstName} {user.lastName}
                                         </option>
                                     ))}
                                 </select>

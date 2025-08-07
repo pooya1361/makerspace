@@ -18,7 +18,7 @@ export default function WelcomeRibbon() {
             {
                 loggedInUser && show ?
                     <div className="hidden md:flex px-10 py-1 bg-white justify-between">
-                        <span className="text-gray-800">Welcome {loggedInUser.firstName}! ({loggedInUser.userType})</span>
+                        <span className="text-gray-800">Welcome {loggedInUser.firstName}!</span>
                         <button className="cursor-pointer border hover:border-gray-500 hover:bg-fuchsia-100 rounded w-6 h-6 text-center align-middle flex justify-center items-center" onClick={() => setShow(false)}>
                             <span className="text-gray-800 select-none text-2xl inline-flex">×</span>
                         </button>

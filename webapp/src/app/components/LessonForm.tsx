@@ -135,7 +135,7 @@ export default function LessonForm({ initialLesson }: LessonFormProps) {
     };
 
     return (
-        <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-lg">
+        <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-lg text-gray-700">
             <h2 className="text-2xl font-bold mb-6 text-center">
                 {isEditMode ? 'Edit Lesson' : 'Add New Lesson'}
             </h2>

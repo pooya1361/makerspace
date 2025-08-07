@@ -10,9 +10,7 @@ export default function EditLessonPage() {
     const lessonId = params.id as string;
 
     // Use the hook instead of direct dispatch
-    const { data: lesson, isError, error, isLoading } = useGetLessonByIdQuery(lessonId);
-
-    console.log("🚀 ~ EditLessonPage ~ lesson:", lesson, error);
+    const { data: lesson, isError, isLoading } = useGetLessonByIdQuery(lessonId);
 
     if (isLoading) {
         return <div>Loading lesson...</div>;
