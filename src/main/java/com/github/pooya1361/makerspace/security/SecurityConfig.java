@@ -52,9 +52,9 @@ public class SecurityConfig {
                                 "/swagger-ui.html"
                         ).permitAll()
                         .requestMatchers("/api/votes/**").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/api/**").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.PATCH, "/api/**").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/**").hasAnyAuthority("ADMIN", "SUPERADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/**").hasAnyAuthority("ADMIN", "SUPERADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/**").hasAnyAuthority("ADMIN", "SUPERADMIN")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
