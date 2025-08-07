@@ -13,4 +13,5 @@ import lombok.NoArgsConstructor;
 public class AuthenticationResponse {
     private String message; // e.g., "Login successful", "Registration successful"
     private UserResponseDTO user;
+    private String token;
 }

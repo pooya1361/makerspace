@@ -1,31 +1,30 @@
 // webapp/src/app/lessons/[id]/edit/page.tsx
-// This is a Server Component - NO 'use client' at the top
+'use client';  // ← Add this!
 
 import LessonForm from '@/app/components/LessonForm';
-import { apiSlice } from '@/app/lib/features/api/apiSlice';
-import { makeStore } from '@/app/lib/store';
-import { notFound } from 'next/navigation'; // For handling workshop not found
+import { useGetLessonByIdQuery } from '@/app/lib/features/api/apiSlice';
+import { useParams } from 'next/navigation';
 
-type EditLessonPageProps = {
-    params: Promise<{
-        id: string;
-    }>;
-};
+export default function EditLessonPage() {
+    const params = useParams();
+    const lessonId = params.id as string;
 
-export default async function EditLessonPage({ params: paramPromise }: EditLessonPageProps) {
-    const params = await paramPromise
-    const lessonId = params.id;
+    // Use the hook instead of direct dispatch
+    const { data: lesson, isError, error, isLoading } = useGetLessonByIdQuery(lessonId);
 
-    // Fetch the Lesson data on the server
-    const { data: lesson, isError, error } = await makeStore().dispatch(
-        apiSlice.endpoints.getLessonById.initiate(lessonId)
-    );
+    console.log("🚀 ~ EditLessonPage ~ lesson:", lesson, error);
 
-    if (isError || !lesson) {
-        console.error(`Error fetching Lesson ${lessonId}:`, error);
-        // Use Next.js notFound() to render the not-found page
-        // This is better for SEO than just rendering an error message
-        notFound();
+    if (isLoading) {
+        return <div>Loading lesson...</div>;
+    }
+
+    if (isError) {
+        // Don't call notFound() - just show a loading state while redirecting
+        return <div>Lesson not found. Redirecting...</div>;
+    }
+
+    if (!lesson) {
+        return <div>No lesson data available.</div>;
     }
 
     return (

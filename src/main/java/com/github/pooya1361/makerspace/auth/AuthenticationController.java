@@ -102,6 +102,7 @@ public class AuthenticationController {
         AuthenticationResponse loginResponse = new AuthenticationResponse();
         loginResponse.setUser(userMapper.toDto(user));
         loginResponse.setMessage("Login successful");
+        loginResponse.setToken(jwtToken);
         return ResponseEntity.ok(loginResponse);
     }
 

@@ -1,18 +1,17 @@
 // webapp/src/app/Lessons/[id]/edit/LessonEditForm.tsx or a new path like /components/LessonForm.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { revalidateLessonsPath } from '@/app/actions';
+import { LessonCreateDTO, LessonResponseDTO } from '@/app/interfaces/api';
 import {
-    useUpdateLessonMutation,
+    useCreateLessonMutation,
     useDeleteLessonMutation,
     useGetActivitiesQuery,
-    useCreateLessonMutation, // <-- NEW: Add mutation hook
+    useUpdateLessonMutation,
 } from '@/app/lib/features/api/apiSlice';
-import { revalidateLessonsPath } from '@/app/actions';
-import { LessonResponseDTO } from '@/app/interfaces/api';
-import { LessonCreateDTO } from '@/app/interfaces/api'; // Assuming you have this for add operations
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 // Type definition for the component's props
 type LessonFormProps = {
@@ -28,8 +27,8 @@ export default function LessonForm({ initialLesson }: LessonFormProps) {
     // Initialize state based on mode
     const [name, setName] = useState(initialLesson?.name || '');
     const [description, setDescription] = useState(initialLesson?.description || '');
-    const [activityId, setActivityId] = useState<number | null>(
-        initialLesson?.activity?.id ?? null // Use nullish coalescing for cleaner default
+    const [activityId, setActivityId] = useState<number>(
+        initialLesson?.activity?.id || -1
     );
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
@@ -39,23 +38,27 @@ export default function LessonForm({ initialLesson }: LessonFormProps) {
     const [deleteLesson, { isLoading: isDeleting }] = useDeleteLessonMutation();
     const [addLesson, { isLoading: isAdding }] = useCreateLessonMutation(); // <-- NEW: Add mutation
 
-    const { data: activities, isLoading: isLoadingActivities } = useGetActivitiesQuery();
+    const { data: activities, isLoading: isLoadingActivities, isError, error } = useGetActivitiesQuery();
 
     const isFormLoading = isUpdating || isDeleting || isAdding; // Include isAdding
 
-    // Optional: Update form state if initialLesson changes (e.g., from a different edit link)
-    // This useEffect ensures that if the component is reused for a *different* edit item
-    // without remounting, the form fields update.
+    // Handle the case where lesson is deleted
+    useEffect(() => {
+        if (isError && error && 'status' in error && error.status === 404) {
+            console.log('Lesson not found, redirecting...');
+            router.replace('/lessons'); // Use replace instead of push
+            return;
+        }
+    }, [isError, error, router]);
+
     useEffect(() => {
         setName(initialLesson?.name || '');
         setDescription(initialLesson?.description || '');
-        setActivityId(initialLesson?.activity?.id ?? null);
+        setActivityId(initialLesson?.activity?.id || -1);
     }, [initialLesson]);
 
     const handleActivityChange = (value: string) => {
-        // Convert string to number, if empty string, set to null
-        const id = value === "-1" ? Number(value) : null;
-        setActivityId(id);
+        setActivityId(Number(value));
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -64,7 +67,12 @@ export default function LessonForm({ initialLesson }: LessonFormProps) {
         setSuccessMessage('');
 
         if (!name.trim()) {
-            setErrorMessage('Lesson Name is required.'); // Be more specific
+            setErrorMessage('Lesson Name is required.'); 
+            return;
+        }
+
+        if (!activityId || activityId < 1) {
+            setErrorMessage('Activity is required.'); 
             return;
         }
 
@@ -75,7 +83,7 @@ export default function LessonForm({ initialLesson }: LessonFormProps) {
                     id: initialLesson!.id, // 'id' is guaranteed in edit mode
                     name,
                     description,
-                    activityId: activityId as unknown as number,
+                    activityId: activityId,
                 }).unwrap();
                 setSuccessMessage('Lesson updated successfully!');
             } else {
@@ -84,7 +92,7 @@ export default function LessonForm({ initialLesson }: LessonFormProps) {
                     id: -1,
                     name,
                     description,
-                    activityId: activityId as unknown as number,
+                    activityId: activityId,
                 };
                 await addLesson(newLesson).unwrap();
                 setSuccessMessage('Lesson added successfully!');
@@ -111,10 +119,9 @@ export default function LessonForm({ initialLesson }: LessonFormProps) {
         }
 
         try {
+            router.push('/lessons');
             await deleteLesson(initialLesson.id.toString()).unwrap();
             setSuccessMessage('Lesson deleted successfully!');
-            await revalidateLessonsPath();
-            router.push('/lessons');
         } catch (err: any) { // Consider type narrowing
             console.error('Failed to delete Lesson:', err);
             if (err.data && err.data.message) {
@@ -148,7 +155,7 @@ export default function LessonForm({ initialLesson }: LessonFormProps) {
             <form onSubmit={handleSubmit}>
                 <div className="mb-4">
                     <label htmlFor="name" className="block text-gray-700 text-sm font-bold mb-2">
-                        Lesson Name:
+                        Lesson Name: *
                     </label>
                     <input
                         type="text"
@@ -176,7 +183,7 @@ export default function LessonForm({ initialLesson }: LessonFormProps) {
 
                 <div className="mb-6">
                     <label className="block text-gray-700 text-sm font-bold mb-2">
-                        Activity:
+                        Activity: *
                     </label>
                     {isLoadingActivities ? (
                         <p>Loading activities...</p>
@@ -187,9 +194,10 @@ export default function LessonForm({ initialLesson }: LessonFormProps) {
                                     id="activities"
                                     onChange={(e) => handleActivityChange(e.target.value)}
                                     className="border text-gray-700 text-sm rounded-lg block w-full p-2.5"
-                                    value={activityId ?? ''} // Use empty string for null/undefined to select default option
+                                    value={activityId}
+                                    required
                                 >
-                                    <option value={-1}>-- Select a Activity (Optional) --</option> {/* Added a placeholder option */}
+                                    <option value={undefined}>-- Select a Activity --</option> {/* Added a placeholder option */}
                                     {activities.map(workshop => (
                                         <option key={workshop.id} value={workshop.id}>
                                             {workshop.name}

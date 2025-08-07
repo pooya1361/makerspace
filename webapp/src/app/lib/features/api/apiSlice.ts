@@ -17,12 +17,24 @@ const baseQuery = fetchBaseQuery({
     credentials: 'include',
     prepareHeaders: (headers) => {
         console.log('RTK Query: Making request with cookies');
+        console.log('Document cookies:', document?.cookie); // Add this
+        console.log('Headers being sent:', Object.fromEntries(headers.entries())); // Add this
         return headers;
     },
 });
 
 const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
     const result = await baseQuery(args, api, extraOptions);
+
+    // Add detailed logging
+    if (result.error) {
+        console.log('API Error Details:', {
+            status: result.error.status,
+            data: result.error.data,
+            url: args,
+            error: result.error
+        });
+    }
 
     if (result.error && result.error.status === 401) {
         console.warn('Unauthorized request. Dispatching logout...');
