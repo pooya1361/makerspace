@@ -1,5 +1,5 @@
 // webapp/src/lib/features/api/apiSlice.ts
-import { ActivityCreateDTO, ActivityResponseDTO, Lesson, LessonCreateDTO, LessonResponseDTO, ProposedTimeSlotCreateDTO, ProposedTimeSlotResponseDTO, ScheduledLessonCreateDTO, ScheduledLessonResponseDTO, SummaryResponseDTO, UserCreateDTO, UserResponseDTO, VoteCreateDTO, VoteResponseDTO, WorkshopCreateDTO, WorkshopResponseDTO } from '@/app/interfaces/api'; // Adjust path as needed
+import { ActivityCreateDTO, ActivityResponseDTO, Lesson, LessonCreateDTO, LessonResponseDTO, LessonUser, LessonUserCreateDTO, LessonUserResponseDTO, ProposedTimeSlotCreateDTO, ProposedTimeSlotResponseDTO, ScheduledLessonCreateDTO, ScheduledLessonResponseDTO, SummaryResponseDTO, UserCreateDTO, UserResponseDTO, VoteCreateDTO, VoteResponseDTO, WorkshopCreateDTO, WorkshopResponseDTO } from '@/app/interfaces/api'; // Adjust path as needed
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { logout as authLogout, logout, setCredentials, startLogout } from '../auth/authSlice';
 
@@ -56,7 +56,7 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
 export const apiSlice = createApi({
     reducerPath: 'api',
     baseQuery: baseQueryWithReauth,
-    tagTypes: ['ScheduledLesson', 'Lesson', 'ProposedTimeSlot', 'Vote', 'Summary', 'Workshop', 'Activity', 'User'],
+    tagTypes: ['ScheduledLesson', 'Lesson', 'ProposedTimeSlot', 'Vote', 'Summary', 'Workshop', 'Activity', 'User', 'LessonUser'],
     endpoints: (builder) => ({
         login: builder.mutation<LoginResponse, LoginRequest>({
             query: (credentials) => ({
@@ -117,6 +117,11 @@ export const apiSlice = createApi({
         getOverallSummary: builder.query<SummaryResponseDTO, void>({
             query: () => '/api/summary',
             providesTags: ['Summary'], // Tag for caching
+        }),
+
+        getAvailableLessons: builder.query<ScheduledLessonResponseDTO[], void>({
+            query: () => '/api/summary/available-lessons',
+            providesTags: ['Summary'],
         }),
 
         getUsers: builder.query<UserResponseDTO[], void>({
@@ -227,6 +232,50 @@ export const apiSlice = createApi({
                 method: 'DELETE',
             }),
             invalidatesTags: (result, error, id) => ['ScheduledLesson', { type: 'ScheduledLesson', id }, 'Workshop'],
+        }),
+
+        /**
+         * ------------------------------------------------------------ Lesson-User ------------------------------------------------------------
+         */
+        getLessonUsers: builder.query<LessonUserResponseDTO[], void>({
+            query: () => '/api/lesson-users',
+            providesTags: ['LessonUser'], 
+        }),
+
+        getLessonUserById: builder.query<LessonUser, string>({
+            query: (id) => `/api/lesson-users/${id}`,
+            providesTags: (result, error, id) => [{ type: 'LessonUser', id }],
+        }),
+
+        getLessonsByUserId: builder.query<LessonUserResponseDTO[], string>({
+            query: (id) => `/api/lesson-users/user/${id}`,
+            providesTags: (result, error, id) => [{ type: 'LessonUser', id }],
+        }),
+
+        createLessonUser: builder.mutation<LessonUserResponseDTO, Omit<LessonUserCreateDTO, 'id'>>({
+            query: (newLessonUser) => ({
+                url: '/api/lesson-users',
+                method: 'POST',
+                body: newLessonUser,
+            }),
+            invalidatesTags: ['LessonUser', 'Summary'],
+        }),
+
+        updateLessonUser: builder.mutation<LessonUserResponseDTO, LessonUserCreateDTO>({
+            query: ({ id, ...patch }) => ({
+                url: `/api/lesson-users/${id}`,
+                method: 'PATCH',
+                body: patch,
+            }),
+            invalidatesTags: (result, error, { id }) => ['LessonUser', { type: 'LessonUser', id }, 'Summary'],
+        }),
+
+        deleteLessonUser: builder.mutation<void, string>({
+            query: (id) => ({
+                url: `/api/lesson-users/${id}`,
+                method: 'DELETE',
+            }),
+            invalidatesTags: (result, error, id) => ['LessonUser', { type: 'LessonUser', id }, 'Summary'],
         }),
 
         /**
@@ -360,6 +409,7 @@ export const {
     useRegisterMutation,
     useGetCurrentUserQuery,
     useGetOverallSummaryQuery,
+    useGetAvailableLessonsQuery,
     useGetUsersQuery,
 
     // Vote
@@ -378,6 +428,14 @@ export const {
     useUpdateLessonMutation,
     useDeleteLessonMutation,
     useCreateLessonMutation,
+
+    // Lesson-user
+    useGetLessonUserByIdQuery,
+    useGetLessonsByUserIdQuery,
+    useGetLessonUsersQuery,
+    useUpdateLessonUserMutation,
+    useDeleteLessonUserMutation,
+    useCreateLessonUserMutation,
 
     // Scheduled lesson
     useGetScheduledLessonByIdQuery,

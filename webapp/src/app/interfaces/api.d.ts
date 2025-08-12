@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-// Generated using typescript-generator version 3.2.1263 on 2025-08-07 14:16:57.
+// Generated using typescript-generator version 3.2.1263 on 2025-08-12 20:22:31.
 
 export interface ActivityCreateDTO {
     id: number;
@@ -14,6 +14,13 @@ export interface LessonCreateDTO {
     name: string;
     description: string;
     activityId: number;
+}
+
+export interface LessonUserCreateDTO {
+    id: number;
+    lessonId: number;
+    userId: number;
+    acquired: boolean;
 }
 
 export interface ProposedTimeSlotCreateDTO {
@@ -65,6 +72,13 @@ export interface LessonResponseDTO {
     name: string;
     description: string;
     activity: ActivityResponseDTO;
+}
+
+export interface LessonUserResponseDTO {
+    id: number;
+    lesson: LessonResponseDTO;
+    user: UserSummaryDTO;
+    acquired: boolean;
 }
 
 export interface ProposedTimeSlotResponseDTO {
@@ -127,6 +141,13 @@ export interface Lesson {
     activity: Activity;
 }
 
+export interface LessonUser {
+    id: number;
+    lesson: Lesson;
+    user: User;
+    acquired: boolean;
+}
+
 export interface ProposedTimeSlot {
     id: number;
     proposedStartTime: Date;
@@ -171,6 +192,13 @@ export interface WorkshopSummaryDTO {
     size: number;
 }
 
+export interface UserSummaryDTO {
+    id: number;
+    username: string;
+    email: string;
+    userType: UserType;
+}
+
 export interface ScheduledLessonSummaryDTO {
     id: number;
     startTime?: Date;
@@ -190,13 +218,6 @@ export interface ProposedTimeSlotSummaryDTO {
     votes: VoteSummaryDTO[];
 }
 
-export interface UserSummaryDTO {
-    id: number;
-    username: string;
-    email: string;
-    userType: UserType;
-}
-
 export interface ActivitySummaryDTO {
     id: number;
     name: string;
@@ -208,11 +229,11 @@ export interface GrantedAuthority extends Serializable {
 }
 
 export interface UserDetails extends Serializable {
-    password: string;
     enabled: boolean;
-    username: string;
-    authorities: GrantedAuthority[];
     accountNonLocked: boolean;
+    authorities: GrantedAuthority[];
+    password: string;
+    username: string;
     accountNonExpired: boolean;
     credentialsNonExpired: boolean;
 }

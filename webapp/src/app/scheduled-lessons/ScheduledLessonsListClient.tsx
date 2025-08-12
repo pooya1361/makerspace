@@ -29,8 +29,6 @@ export default function ScheduledLessonsListClient() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {scheduledLessons.map((scheduledLesson) => (
                 <div key={scheduledLesson.id} className="bg-white rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-300">
-                    {/* Add a placeholder image or actual image if available */}
-                    {/* <img src={lesson.imageUrl || '/placeholder-lesson.jpg'} alt={lesson.name} className="w-full h-48 object-cover" /> */}
                     <div className="p-6 flex flex-col justify-between h-full">
                         <div className="">
                             <h2 className="text-2xl font-semibold mb-2 text-gray-900">{scheduledLesson.lesson.name}</h2>

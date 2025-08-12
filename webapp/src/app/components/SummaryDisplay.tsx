@@ -47,7 +47,7 @@ export default function SummaryDisplay() {
     }
 
     return (
-        <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-800 p-4 rounded-md mb-8 shadow-md w-full">
+        <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-800 p-4 rounded-md shadow-md w-full">
             <h2 className="text-2xl font-semibold mb-3">Overall Statistics</h2>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
                 <div className="bg-white p-4 rounded-lg shadow-sm">
