@@ -55,6 +55,7 @@ export default function LoginPage() {
                             autoComplete="true"
                             onChange={(e) => setEmail(e.target.value)}
                             required
+                            data-testid="email-input"
                         />
                     </div>
                     <div>
@@ -69,15 +70,17 @@ export default function LoginPage() {
                             autoComplete="true"
                             onChange={(e) => setPassword(e.target.value)}
                             required
+                            data-testid="password-input"
                         />
                     </div>
                     {error && (
-                        <p className="text-red-600 text-sm text-center">{error}</p>
+                        <p data-testid="login-error" className="text-red-600 text-sm text-center">{error}</p>
                     )}
                     <button
                         type="submit"
                         className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                         disabled={loading}
+                        data-testid="login-button"
                     >
                         {loading ? 'Logging in...' : 'Login'}
                     </button>

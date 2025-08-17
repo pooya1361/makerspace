@@ -40,7 +40,7 @@ export default function Header() {
     };
 
     return (
-        <header className="bg-linear-to-r from-indigo-500 via-violet-500 to-fuchsia-500 text-white p-4 shadow-md">
+        <header className="bg-linear-to-r from-indigo-500 via-violet-500 to-fuchsia-500 text-white p-4 shadow-md" data-testid="main-nav">
             <div className="container mx-auto flex justify-between items-center">
                 {/* Logo/Site Title */}
                 <Link href="/" className="text-2xl font-bold hover:text-blue-200 transition duration-300">
@@ -48,20 +48,20 @@ export default function Header() {
                 </Link>
 
                 {/* Desktop Navigation */}
-                <nav className="hidden md:flex space-x-6">
+                <nav className="hidden md:flex">
                     {isLoggedIn ? (
-                        <>
+                        <div className='space-x-6' data-testid="user-menu">
                             <NavLink href="/" currentPath={pathname}>Home</NavLink>
                             <NavLink href="/workshops" currentPath={pathname}>Workshops</NavLink>
                             <NavLink href="/activities" currentPath={pathname}>Activities</NavLink>
                             <NavLink href="/lessons" currentPath={pathname}>Lessons</NavLink>
                             <NavLink href="/scheduled-lessons" currentPath={pathname}>Scheduled Lessons</NavLink>
-                            <button onClick={handleLogout} className="text-white hover:text-blue-200 transition duration-300" disabled={isLoading}>
+                            <button onClick={handleLogout} className="text-white hover:text-blue-200 transition duration-300" disabled={isLoading} data-testid="logout-button">
                                 Logout
                             </button>
-                        </>
+                        </div>
                     ) : (
-                        <NavLink href="/login" currentPath={pathname}>Login</NavLink>
+                            <NavLink href="/login" currentPath={pathname} data-testid="nav-login">Login</NavLink>
                     )}
                 </nav>
 
@@ -86,18 +86,18 @@ export default function Header() {
                 <div className="md:hidden bg-blue-800 py-4 mt-2 rounded-lg shadow-lg">
                     <nav className="flex flex-col items-center space-y-4">
                         {isLoggedIn ? (
-                            <>
+                            <div className='space-y-4' data-testid="user-menu">
                                 <NavLink href="/" currentPath={pathname} onSelect={toggleMobileMenu}>Home</NavLink>
                                 <NavLink href="/workshops" currentPath={pathname} onSelect={toggleMobileMenu}>Workshops</NavLink>
                                 <NavLink href="/activities" currentPath={pathname} onSelect={toggleMobileMenu}>Activities</NavLink>
                                 <NavLink href="/lessons" currentPath={pathname} onSelect={toggleMobileMenu}>Lessons</NavLink>
                                 <NavLink href="/scheduled-lessons" currentPath={pathname} onSelect={toggleMobileMenu}>Scheduled Lessons</NavLink>
-                                <button onClick={() => { handleLogout(); toggleMobileMenu(); }} className="text-white hover:text-blue-200 transition duration-300" disabled={isLoading}>
+                                <button onClick={() => { handleLogout(); toggleMobileMenu(); }} className="text-white hover:text-blue-200 transition duration-300" disabled={isLoading} data-testid="logout-button">
                                     Logout
                                 </button>
-                            </>
+                            </div>
                         ) : (
-                            <NavLink href="/login" currentPath={pathname} onSelect={toggleMobileMenu}>Login</NavLink>
+                                <NavLink href="/login" currentPath={pathname} onSelect={toggleMobileMenu} data-testid="nav-login">Login</NavLink>
                         )}
                     </nav>
                 </div>

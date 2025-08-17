@@ -39,3 +39,20 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# === PLAYWRIGHT ===
+# Test results and reports
+/test-results/
+/playwright-report/
+/blob-report/
+
+# Authentication states (contains sensitive data)
+/tests/.auth/
+
+# Playwright cache and browsers
+/playwright/.cache/
+
+# Test artifacts
+/traces/
+/videos/
+/screenshots/

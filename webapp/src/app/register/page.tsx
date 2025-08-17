@@ -69,6 +69,7 @@ export default function RegisterPage() {
                             value={firstName}
                             onChange={(e) => setFirstName(e.target.value)}
                             required
+                            data-testid="firstname-input"
                         />
                     </div>
                     <div>
@@ -82,6 +83,7 @@ export default function RegisterPage() {
                             value={lastName}
                             onChange={(e) => setLastName(e.target.value)}
                             required
+                            data-testid="lastname-input"
                         />
                     </div>
                     <div>
@@ -95,6 +97,7 @@ export default function RegisterPage() {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
+                            data-testid="email-input"
                         />
                     </div>
                     <div>
@@ -108,6 +111,7 @@ export default function RegisterPage() {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
+                            data-testid="password-input"
                         />
                     </div>
                     <div>
@@ -121,6 +125,7 @@ export default function RegisterPage() {
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
                             required
+                            data-testid="confirm-password-input"
                         />
                     </div>
                     {error && (
@@ -133,6 +138,7 @@ export default function RegisterPage() {
                         type="submit"
                         className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                         disabled={isLoading}
+                        data-testid="register-button"
                     >
                         {isLoading ? 'Registering...' : 'Register'}
                     </button>

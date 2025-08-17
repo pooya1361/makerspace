@@ -14,7 +14,7 @@ export default async function WorkshopsPage() {
             <div className="flex justify-between items-center mb-10">
                 <h1 className="text-4xl font-bold text-blue-800">Workshops</h1>
                 <AdminOnly>
-                    <Link href="/workshops/add" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                    <Link data-testid="add-workshop-button" href="/workshops/add" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
                         + Add Workshop
                     </Link>
                 </AdminOnly>

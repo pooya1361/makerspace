@@ -1,5 +1,4 @@
 // app/activities/page.tsx
-// This is a Server Component, ideal for fetching data from your backend.
 
 import Link from 'next/link';
 import AdminOnly from '../components/AdminOnly';

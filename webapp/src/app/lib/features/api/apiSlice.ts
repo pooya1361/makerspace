@@ -37,17 +37,11 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
     if (result.error && result.error.status === 401) {
         console.warn('Unauthorized request. Dispatching logout...');
 
-        try {
-            await baseQuery('/api/auth/logout', api, {
-                ...extraOptions,
-                method: 'POST'
-            });
-        } catch (logoutError) {
-            console.warn('Logout endpoint failed:', logoutError);
+        if (typeof args === 'string' && args.includes('/api/auth/me')) {
+            api.dispatch(authLogout());
+        } else if (typeof args === 'object' && 'url' in args && (args.url as string).includes('/api/auth/me')) {
+            api.dispatch(authLogout());
         }
-
-        api.dispatch(authLogout());
-        api.dispatch(apiSlice.util.resetApiState());
     }
 
     return result;
@@ -70,6 +64,7 @@ export const apiSlice = createApi({
                     dispatch(setCredentials({
                         user: data.user
                     }));
+                    console.log("🚀 ~ onQueryStarted ~ data.user:", data.user)
                     console.log('Login successful - cookies set by server');
                 } catch (error) {
                     console.error('Login failed:', error);
@@ -108,7 +103,6 @@ export const apiSlice = createApi({
             }),
         }),
 
-        // Get current user info (for auth check on page load)
         getCurrentUser: builder.query<any, void>({
             query: () => '/api/auth/me',
             providesTags: ['User'],
