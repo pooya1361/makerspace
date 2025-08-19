@@ -11,25 +11,7 @@ export const makeStore = () =>
         },
         middleware: (getDefaultMiddleware) =>
             getDefaultMiddleware({
-                serializableCheck: {
-                    ignoredActions: [
-                        // Ignore RTK Query actions
-                        'api/executeQuery/fulfilled',
-                        'api/executeQuery/pending',
-                        'api/executeMutation/fulfilled',
-                        'api/executeMutation/pending',
-                    ],
-                    ignoredActionsPaths: [
-                        'payload.proposedTimeSlots',
-                        'payload.startTime',
-                        'meta.arg.originalArgs',
-                    ],
-                    ignoredPaths: [
-                        // Ignore these paths in state where dates are stored
-                        'api.queries',
-                        'api.mutations',
-                    ],
-                },
+                serializableCheck: false,
             }).concat(apiSlice.middleware),
     });
 

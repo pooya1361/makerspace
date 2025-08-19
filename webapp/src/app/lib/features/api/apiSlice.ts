@@ -1,7 +1,7 @@
 // webapp/src/lib/features/api/apiSlice.ts
 import { ActivityCreateDTO, ActivityResponseDTO, Lesson, LessonCreateDTO, LessonResponseDTO, LessonUser, LessonUserCreateDTO, LessonUserResponseDTO, ProposedTimeSlotCreateDTO, ProposedTimeSlotResponseDTO, ScheduledLessonCreateDTO, ScheduledLessonResponseDTO, SummaryResponseDTO, UserCreateDTO, UserResponseDTO, VoteCreateDTO, VoteResponseDTO, WorkshopCreateDTO, WorkshopResponseDTO } from '@/app/interfaces/api'; // Adjust path as needed
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { logout as authLogout, logout, setCredentials, startLogout } from '../auth/authSlice';
+import { logout, setCredentials, startLogout } from '../auth/authSlice';
 
 interface LoginRequest {
     email: string;
@@ -12,36 +12,55 @@ interface LoginResponse {
     user: UserResponseDTO
 }
 
+const isServer = typeof window === "undefined";
+
 const baseQuery = fetchBaseQuery({
-    baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || 'https://localhost:8080',
-    credentials: 'include',
-    prepareHeaders: (headers) => {
-        console.log('RTK Query: Making request with cookies');
-        return headers;
-    },
+    baseUrl: isServer ? process.env.NEXT_PUBLIC_API_BASE_URL || 'https://localhost:8080' : '/api', // Goes to proxy
+    credentials: 'include', // For client-side requests
 });
 
-const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
-    const result = await baseQuery(args, api, extraOptions);
+const baseQueryWithAuth = async (args: any, api: any, extraOptions: { serverCookies?: string }) => {
+    console.log(`🔍 RTK Query: ${api.type} ${api.endpoint}`);
 
-    // Add detailed logging
-    if (result.error) {
-        console.log('API Error Details:', {
-            status: result.error.status,
-            data: result.error.data,
-            url: args,
-            error: result.error
-        });
+    // ✅ Server-side: Use cookies passed via extraOptions (no import needed!)
+    if (typeof window === 'undefined' && extraOptions?.serverCookies) {
+        console.log('✅ Server: Using server-provided cookies');
+
+        const modifiedArgs = typeof args === 'string'
+            ? { url: args, headers: {} }
+            : { ...args, headers: { ...args.headers } };
+
+        if (isServer && extraOptions?.serverCookies) {
+            modifiedArgs.headers['Cookie'] = extraOptions.serverCookies;
+        }
+
+        const result = await baseQuery(modifiedArgs, api, extraOptions);
+
+        if (result.error) {
+            console.log('❌ Server RTK Query Error:', result.error.status);
+        } else {
+            console.log('✅ Server RTK Query Success');
+        }
+
+        return result;
     }
 
-    if (result.error && result.error.status === 401) {
-        console.warn('Unauthorized request. Dispatching logout...');
+    // ✅ Client-side: Use normal credentials: 'include'
+    const result = await baseQuery(args, api, extraOptions);
 
-        if (typeof args === 'string' && args.includes('/api/auth/me')) {
-            api.dispatch(authLogout());
-        } else if (typeof args === 'object' && 'url' in args && (args.url as string).includes('/api/auth/me')) {
-            api.dispatch(authLogout());
+    if (result.error) {
+        console.log('❌ Client RTK Query Error:', {
+            status: result.error.status,
+            endpoint: typeof args === 'string' ? args : args.url,
+        });
+
+        // Handle 401 on client
+        if (typeof window !== 'undefined' && result.error.status === 401) {
+            console.warn('❌ Client: Unauthorized, redirecting to login');
+            window.location.href = '/login';
         }
+    } else {
+        console.log('✅ Client RTK Query Success');
     }
 
     return result;
@@ -49,8 +68,8 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
 
 export const apiSlice = createApi({
     reducerPath: 'api',
-    baseQuery: baseQueryWithReauth,
-    tagTypes: ['ScheduledLesson', 'Lesson', 'ProposedTimeSlot', 'Vote', 'Summary', 'Workshop', 'Activity', 'User', 'LessonUser'],
+    baseQuery: baseQueryWithAuth,
+    tagTypes: ['ScheduledLesson', 'Lesson', 'ProposedTimeSlot', 'Vote', 'Summary', 'Workshop', 'Activity', 'User', 'LessonUser', 'WorkshopGraphQL'],
     endpoints: (builder) => ({
         login: builder.mutation<LoginResponse, LoginRequest>({
             query: (credentials) => ({
@@ -64,7 +83,6 @@ export const apiSlice = createApi({
                     dispatch(setCredentials({
                         user: data.user
                     }));
-                    console.log("🚀 ~ onQueryStarted ~ data.user:", data.user)
                     console.log('Login successful - cookies set by server');
                 } catch (error) {
                     console.error('Login failed:', error);
@@ -233,7 +251,7 @@ export const apiSlice = createApi({
          */
         getLessonUsers: builder.query<LessonUserResponseDTO[], void>({
             query: () => '/api/lesson-users',
-            providesTags: ['LessonUser'], 
+            providesTags: ['LessonUser'],
         }),
 
         getLessonUserById: builder.query<LessonUser, string>({
@@ -319,6 +337,36 @@ export const apiSlice = createApi({
             providesTags: ['Workshop'], // Tag for caching
         }),
 
+        getWorkshopsGraphQL: builder.query<WorkshopResponseDTO[], void>({
+            query: () => ({
+                url: '/graphql',
+                method: 'POST',
+                body: {
+                    query: `
+                        query { 
+                            workshops { 
+                                id 
+                                name 
+                                description 
+                                size 
+                                activities {
+                                    id
+                                    name
+                                    description
+                                }
+                            } 
+                        }`
+                }
+            }),
+            transformResponse: (response: any) => {
+                if (response.errors) {
+                    throw new Error(response.errors[0]?.message || 'GraphQL error');
+                }
+                return response.data.workshops;
+            },
+            providesTags: ['WorkshopGraphQL'],
+        }),
+
         createWorkshop: builder.mutation<WorkshopResponseDTO, Omit<WorkshopCreateDTO, 'id'>>({ // Returns WorkshopResponseDTO, takes WorkshopCreateDTO without ID
             query: (newWorkshop) => ({
                 url: '/api/workshops',
@@ -329,10 +377,66 @@ export const apiSlice = createApi({
             invalidatesTags: ['Workshop', 'Summary'], // Invalidate summary too, as count might change
         }),
 
+        createWorkshopGraphQL: builder.mutation<WorkshopResponseDTO, Omit<WorkshopCreateDTO, 'id'>>({
+            query: (workshop) => ({
+                url: '/graphql',
+                method: 'POST',
+                body: {
+                    query: `
+                        mutation CreateWorkshop($input: WorkshopCreateInput!) {
+                            createWorkshop(input: $input) {
+                                id
+                                name
+                                description
+                                size
+                                activities {
+                                    id
+                                    name
+                                    description
+                                }
+                            }
+                        }
+                    `,
+                    variables: { input: workshop }
+                }
+            }),
+            transformResponse: (response: { data: { createWorkshop: WorkshopResponseDTO } }) => 
+                response.data.createWorkshop,
+            invalidatesTags: ['WorkshopGraphQL'],
+        }),
+
         getWorkshopById: builder.query<WorkshopResponseDTO, string>({
             query: (id) => `/api/workshops/${id}`,
             // Invalidate specific workshop detail cache if you have it
             providesTags: (result, error, id) => [{ type: 'Workshop', id }],
+        }),
+
+        getWorkshopByIdGraphQL: builder.query<WorkshopResponseDTO, string>({
+            query: (id) => ({
+                url: '/graphql',
+                method: 'POST',
+                body: {
+                    query: `
+                        query GetWorkshop($id: ID!) {
+                            workshop(id: $id) {
+                                id
+                                name
+                                description
+                                size
+                                activities {
+                                    id
+                                    name
+                                    description
+                                }
+                            }
+                        }
+                    `,
+                    variables: { id }
+                }
+            }),
+            transformResponse: (response: { data: { workshop: WorkshopResponseDTO } }) =>
+                response.data.workshop,
+            providesTags: (result, error, id) => [{ type: 'WorkshopGraphQL', id }],
         }),
 
         updateWorkshop: builder.mutation<WorkshopResponseDTO, WorkshopCreateDTO>({ // Workshop includes id
@@ -345,6 +449,34 @@ export const apiSlice = createApi({
             invalidatesTags: (result, error, { id }) => ['Workshop', { type: 'Workshop', id }, 'Activity'],
         }),
 
+        updateWorkshopGraphQL: builder.mutation<WorkshopResponseDTO, { id: string; workshop: WorkshopCreateDTO }>({
+            query: ({ id, workshop }) => ({
+                url: '/graphql',
+                method: 'POST',
+                body: {
+                    query: `
+                        mutation UpdateWorkshop($id: ID!, $input: WorkshopCreateInput!) {
+                            updateWorkshop(id: $id, input: $input) {
+                                id
+                                name
+                                description
+                                size
+                                activities {
+                                    id
+                                    name
+                                    description
+                                }
+                            }
+                        }
+                    `,
+                    variables: { id, input: workshop }
+                }
+            }),
+            transformResponse: (response: { data: { updateWorkshop: WorkshopResponseDTO } }) =>
+                response.data.updateWorkshop,
+            invalidatesTags: (result, error, { id }) => [{ type: 'WorkshopGraphQL', id }, 'WorkshopGraphQL'],
+        }),
+
         deleteWorkshop: builder.mutation<void, string>({ // Pass id as string
             query: (id) => ({
                 url: `/api/workshops/${id}`,
@@ -352,6 +484,28 @@ export const apiSlice = createApi({
             }),
             // Invalidate the list and the specific workshop item
             invalidatesTags: (result, error, id) => ['Workshop', { type: 'Workshop', id }, 'Activity'],
+        }),
+
+        deleteWorkshopGraphQL: builder.mutation<boolean, string>({
+            query: (id) => ({
+                url: '/graphql',
+                method: 'POST',
+                body: {
+                    query: `
+                        mutation DeleteWorkshop($id: ID!) {
+                            deleteWorkshop(id: $id)
+                        }
+                    `,
+                    variables: { id }
+                }
+            }),
+            transformResponse: (response: { data: { deleteWorkshop: boolean } }) =>
+                response.data.deleteWorkshop,
+            transformErrorResponse: (response: any) => {
+                console.error('❌ GraphQL getWorkshops failed:', response);
+                return response;
+            },
+            invalidatesTags: ['WorkshopGraphQL'],
         }),
 
         /**
@@ -444,7 +598,12 @@ export const {
     useGetWorkshopByIdQuery,
     useUpdateWorkshopMutation,
     useDeleteWorkshopMutation,
-
+    useGetWorkshopsGraphQLQuery,
+    useGetWorkshopByIdGraphQLQuery,
+    useCreateWorkshopGraphQLMutation,
+    useUpdateWorkshopGraphQLMutation,
+    useDeleteWorkshopGraphQLMutation,
+    
     // Activity
     useGetActivitiesQuery,
     useCreateActivityMutation,

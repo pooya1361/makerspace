@@ -1,0 +1,46 @@
+# Workshop GraphQL Schema
+
+type Query {
+    workshops: [WorkshopResponse!]!
+    workshop(id: ID!): WorkshopResponse
+    workshopSummaries: [WorkshopSummary!]!
+}
+
+type Mutation {
+    createWorkshop(input: WorkshopCreateInput!): WorkshopResponse!
+    updateWorkshop(id: ID!, input: WorkshopCreateInput!): WorkshopResponse!
+    deleteWorkshop(id: ID!): Boolean!
+}
+
+# Workshop response type - mirrors your WorkshopResponseDTO
+type WorkshopResponse {
+    id: ID!
+    name: String!
+    description: String
+    size: Float!
+    activities: [ActivitySummary!]
+}
+
+# Workshop summary type - mirrors your WorkshopSummaryDTO
+type WorkshopSummary {
+    id: ID!
+    name: String!
+    description: String
+    size: Float!
+}
+
+# Activity summary type - you'll need to define this based on your ActivitySummaryDTO
+type ActivitySummary {
+    id: ID!
+    name: String!
+    description: String
+}
+
+# Workshop input type - mirrors your WorkshopCreateDTO
+input WorkshopCreateInput {
+    id: ID
+    name: String!
+    description: String
+    size: Float!
+    activityIds: [ID]
+}

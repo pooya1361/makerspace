@@ -6,7 +6,7 @@ import AdminOnly from '../components/AdminOnly';
 import { apiSlice } from '../lib/features/api/apiSlice';
 
 export default function WorkshopsListClient() {
-    const { data: workshops, isLoading, isError, error } = apiSlice.useGetWorkshopsQuery();
+    const { data: workshops, isLoading, isError, error } = apiSlice.useGetWorkshopsGraphQLQuery();
 
     if (isLoading) {
         return <p className="text-center text-xl text-gray-600">Loading workshops...</p>;

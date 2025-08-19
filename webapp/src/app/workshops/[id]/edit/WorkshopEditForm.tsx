@@ -4,9 +4,9 @@
 import { revalidateWorkshopsPath } from '@/app/actions'; // Your Server Action for revalidation
 import { WorkshopResponseDTO } from '@/app/interfaces/api'; // Assuming you have this interface
 import {
-    useDeleteWorkshopMutation,
+    useDeleteWorkshopGraphQLMutation,
     useGetActivitiesQuery,
-    useUpdateWorkshopMutation
+    useUpdateWorkshopGraphQLMutation
 } from '@/app/lib/features/api/apiSlice';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -27,8 +27,8 @@ export default function WorkshopEditForm({ initialWorkshop }: WorkshopEditFormPr
         initialWorkshop.activities?.map(a => a.id) || []
     );
 
-    const [updateWorkshop, { isLoading: isUpdating }] = useUpdateWorkshopMutation();
-    const [deleteWorkshop, { isLoading: isDeleting }] = useDeleteWorkshopMutation();
+    const [updateWorkshop, { isLoading: isUpdating }] = useUpdateWorkshopGraphQLMutation();
+    const [deleteWorkshop, { isLoading: isDeleting }] = useDeleteWorkshopGraphQLMutation();
     const { data: activities, isLoading: isLoadingActivities } = useGetActivitiesQuery();
 
     const isFormLoading = isUpdating || isDeleting;
@@ -65,11 +65,14 @@ export default function WorkshopEditForm({ initialWorkshop }: WorkshopEditFormPr
 
         try {
             await updateWorkshop({
-                id: initialWorkshop.id,
-                name,
-                description,
-                size: parsedSize,
-                activityIds: selectedActivityIds
+                id: initialWorkshop.id.toString(),
+                workshop: {
+                    id: initialWorkshop.id,
+                    name,
+                    description,
+                    size: parsedSize,
+                    activityIds: selectedActivityIds
+                }
             }).unwrap();
 
             setSuccessMessage('Workshop updated successfully!');
@@ -96,15 +99,15 @@ export default function WorkshopEditForm({ initialWorkshop }: WorkshopEditFormPr
         }
 
         try {
-            await deleteWorkshop(initialWorkshop.id.toString()).unwrap();
+            deleteWorkshop(initialWorkshop.id.toString());
             setSuccessMessage('Workshop deleted successfully!');
 
             // Revalidate the /workshops path
             await revalidateWorkshopsPath();
 
             // Navigate back to the workshops list page after deletion
-            router.push(`/workshops?refresh=true`);
-            router.replace('/workshops');
+            // router.push(`/workshops?refresh=true`);
+            router.push('/workshops');
 
         } catch (err: any) {
             console.error('Failed to delete workshop:', err);

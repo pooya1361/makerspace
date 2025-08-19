@@ -1,7 +1,7 @@
 // webapp/src/app/workshops/[id]/edit/page.tsx
 'use client';
 
-import { useGetWorkshopByIdQuery } from '@/app/lib/features/api/apiSlice';
+import { useGetWorkshopByIdGraphQLQuery } from '@/app/lib/features/api/apiSlice';
 import { selectIsLoggedIn } from '@/app/lib/features/auth/authSlice';
 import Link from 'next/link';
 import { notFound, useParams } from 'next/navigation'; // For handling workshop not found
@@ -17,7 +17,7 @@ export default function EditWorkshopPage() {
     const isLoggedIn = useSelector(selectIsLoggedIn);
 
     // Fetch the workshop data on the server
-    const { data: workshop, isError, error, isLoading } = useGetWorkshopByIdQuery(workshopId, {
+    const { data: workshop, isError, error, isLoading } = useGetWorkshopByIdGraphQLQuery(workshopId, {
         skip: !isLoggedIn || !workshopId, // Skip if not logged in or no ID
     });
 

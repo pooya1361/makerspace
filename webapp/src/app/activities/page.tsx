@@ -2,12 +2,10 @@
 
 import Link from 'next/link';
 import AdminOnly from '../components/AdminOnly';
-import { apiSlice } from '../lib/features/api/apiSlice';
-import { store } from '../lib/store';
 import ActivitiesListClient from './ActivitiesListClient';
 
 export default async function ActivitiesPage() {
-    await store.dispatch(apiSlice.endpoints.getActivities.initiate(undefined));
+    // await store.dispatch(apiSlice.endpoints.getActivities.initiate(undefined));
 
     return (
         <div className="container mx-auto p-6 md:p-10">

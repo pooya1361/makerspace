@@ -34,9 +34,7 @@ export default function ActivitiesListClient() {
                     <div className="p-6">
                         <h2 className="text-2xl font-semibold mb-2 text-gray-900">{activity.name}</h2>
                         <p className="text-gray-600 text-sm mb-4 line-clamp-3">{activity.description}</p>
-                        <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-                            <h4>Location: {activity.workshop ? activity.workshop.name : 'Not assigned'}</h4>
-                        </p>
+                        <p className="text-gray-600 text-sm mb-4 line-clamp-3">Location: {activity.workshop ? activity.workshop.name : 'Not assigned'}</p>
                         <div className='flex gap-3 justify-end'>
                             <AdminOnly>
                                 <Link

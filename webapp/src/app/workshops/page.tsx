@@ -2,12 +2,10 @@
 
 import Link from 'next/link';
 import AdminOnly from '../components/AdminOnly';
-import { apiSlice } from '../lib/features/api/apiSlice';
-import { store } from '../lib/store';
 import WorkshopsListClient from './WorkshopsListClient';
 
 export default async function WorkshopsPage() {
-    await store.dispatch(apiSlice.endpoints.getWorkshops.initiate(undefined));
+    // await store.dispatch(apiSlice.endpoints.getWorkshopsGraphQL.initiate(undefined));
 
     return (
         <div className="container mx-auto p-6 md:p-10">

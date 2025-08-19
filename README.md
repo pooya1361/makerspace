@@ -2,17 +2,19 @@
 
 🚀 **Live Demo**: [https://master.d31o1td403e37h.amplifyapp.com](https://master.d31o1td403e37h.amplifyapp.com)
 
-📊 **API Documentation**: [Backend Swagger UI](https://d10bevpih9tc2u.cloudfront.net/swagger-ui.html)
+📊 **API Documentation**: 
+- [REST API (Swagger UI)](https://d10bevpih9tc2u.cloudfront.net/swagger-ui.html)
+- [GraphQL Playground](https://d10bevpih9tc2u.cloudfront.net/graphiql) *(Development)*
 
-This project, "Makerspace," is a full-stack application designed to manage scheduled lessons, proposed time slots, and user interactions with comprehensive authentication and authorization. It demonstrates a modern technology stack deployed on **AWS** with robust security and testing practices.
+This project, "Makerspace," is a full-stack application designed to manage scheduled lessons, proposed time slots, and user interactions with comprehensive authentication and authorization. It demonstrates a modern technology stack deployed on **AWS** with robust security, testing practices, and **dual API architecture** supporting both REST and GraphQL.
 
 ---
 
 ## 🌟 Live Deployment
 
 **Architecture Overview:**
-- **Frontend**: Next.js deployed on **AWS Amplify** with HTTPS
-- **Backend**: Spring Boot deployed on **AWS Elastic Beanstalk**
+- **Frontend**: Next.js deployed on **AWS Amplify** with HTTPS and Server-Side Rendering (SSR)
+- **Backend**: Spring Boot deployed on **AWS Elastic Beanstalk** with dual API support
 - **Database**: PostgreSQL on **AWS RDS**
 - **Domain**: Custom SSL certificates and load balancing
 
@@ -30,6 +32,7 @@ Test the live application with these accounts:
 * **Java 21**: The core programming language. Chosen for its robustness, performance, latest language features, and vast ecosystem.
 * **Spring Boot 3.5.3**: A powerful framework for building stand-alone, production-grade Spring applications. It simplifies backend development with convention-over-configuration and embedded servers.
 * **Spring Security**: Comprehensive security framework providing authentication, authorization, and protection against common security vulnerabilities. Integrated with JWT for stateless authentication.
+* **Spring GraphQL**: Modern GraphQL integration for Spring Boot, providing type-safe query execution and seamless security integration.
 * **JWT (JSON Web Tokens)**: Stateless authentication mechanism using the `jjwt` library (v0.12.6). Provides secure token-based authentication with HTTP-only cookies for enhanced security.
 * **Spring Data JPA**: Simplifies data access layers by providing an easy way to implement JPA-based repositories, reducing boilerplate code for database interactions.
 * **PostgreSQL**: A powerful, open-source relational database system. Chosen for its reliability, feature richness, and strong support for complex queries.
@@ -44,7 +47,8 @@ Test the live application with these accounts:
 * **TypeScript**: A typed superset of JavaScript that compiles to plain JavaScript. Enhances code quality, readability, and maintainability by catching errors at compile time.
 * **Tailwind CSS**: A utility-first CSS framework. Enables rapid UI development by providing low-level utility classes directly in your JSX, reducing the need for custom CSS.
 * **Redux Toolkit (RTK)**: The official, opinionated, batteries-included toolset for efficient Redux development. Simplifies Redux setup and common tasks.
-* **RTK Query**: A powerful data fetching and caching tool built on top of Redux Toolkit. Greatly reduces boilerplate for API interactions, provides automatic caching, revalidation, and handles loading/error states.
+* **RTK Query**: A powerful data fetching and caching tool built on top of Redux Toolkit. Supports both REST and GraphQL endpoints, provides automatic caching, revalidation, and handles loading/error states.
+* **Server-Side Rendering (SSR)**: Full SSR support with Next.js middleware for authentication and RTK Query server-side data prefetching.
 * **`cz.habarta.typescript-generator-maven-plugin`**: A Maven plugin used to automatically generate TypeScript interfaces (e.g., from Java DTOs). Ensures type safety and consistency between frontend and backend data models.
 
 ### Testing Framework
@@ -73,26 +77,86 @@ Test the live application with these accounts:
 * **Password Encryption**: Secure password hashing using Spring Security's password encoders
 * **CORS Configuration**: Cross-Origin Resource Sharing setup for frontend-backend communication
 * **HTTPS Encryption**: SSL/TLS certificates for secure data transmission
+* **GraphQL Security**: Method-level security with `@PreAuthorize` annotations for GraphQL mutations
+* **Next.js Middleware**: Route protection and authentication validation at the edge
 
 ---
 
-## 📚 API Endpoints
+## 📚 API Architecture
 
-### Authentication Endpoints
+This application supports **dual API architecture** - both REST and GraphQL endpoints running simultaneously:
+
+### REST API Endpoints
 - `POST /api/auth/register` - User registration
 - `POST /api/auth/login` - User login (returns JWT in HTTP-only cookie)
 - `POST /api/auth/logout` - User logout (clears authentication cookie)
 - `GET /api/auth/me` - Get current authenticated user information
-
-### Business Logic Endpoints
 - **Lessons Management**: CRUD operations for lesson scheduling
 - **User Management**: User profiles and role management
 - **Workshop Management**: Workshop creation and enrollment
 - **Time Slot Management**: Available time slot management and voting
 
+### GraphQL API Endpoints
+- **Single Endpoint**: `POST /graphql` - All GraphQL operations
+- **Development UI**: `/graphiql` - Interactive GraphQL playground
+
+#### GraphQL Schema Features
+```graphql
+# Queries
+workshops: [WorkshopResponse!]!
+workshop(id: ID!): WorkshopResponse
+
+# Mutations (Admin/SuperAdmin only)
+createWorkshop(input: WorkshopCreateInput!): WorkshopResponse!
+updateWorkshop(id: ID!, input: WorkshopCreateInput!): WorkshopResponse!
+deleteWorkshop(id: ID!): Boolean!
+
+# Types
+type WorkshopResponse {
+  id: ID!
+  name: String!
+  description: String
+  size: Float!
+  activities: [ActivitySummary!]
+}
+```
+
 ### API Documentation
-- **Live Swagger UI**: [Backend API Docs](https://d10bevpih9tc2u.cloudfront.net/swagger-ui.html)
+- **REST API**: [Swagger UI](https://d10bevpih9tc2u.cloudfront.net/swagger-ui.html)
+- **GraphQL**: [GraphiQL Playground](https://d10bevpih9tc2u.cloudfront.net/graphiql)
 - **OpenAPI JSON**: Available at `/v3/api-docs`
+
+---
+
+## 🏗️ Frontend Architecture
+
+### Server-Side Rendering (SSR)
+- **True SSR**: Data fetched on server with authentication
+- **RTK Query SSR**: Server-side data prefetching with seamless client hydration
+- **No Loading States**: Instant page renders with pre-fetched data
+- **SEO Optimized**: Complete HTML rendered on server
+
+### Data Fetching Strategy
+```typescript
+// Server Component (page.tsx)
+await dispatchWithServerCookies(
+  store.dispatch, 
+  apiSlice.endpoints.getWorkshopsGraphQL, 
+  cookieHeader
+);
+
+// Client Component
+const { data: workshops } = useGetWorkshopsGraphQLQuery();
+// Uses server-cached data instantly - no loading state!
+```
+
+### Authentication Flow
+```
+1. Next.js Middleware → Route Protection
+2. Server Component → Pre-fetch Data with Cookies  
+3. Client Component → Use Cached Data + Mutations
+4. RTK Query → Handle Cache Invalidation
+```
 
 ---
 
@@ -102,7 +166,8 @@ The project includes comprehensive testing coverage:
 
 - **Unit Tests**: Component-level testing with Mockito mocks
 - **Integration Tests**: `@WebMvcTest` for web layer testing
-- **Security Tests**: Authentication and authorization testing
+- **GraphQL Tests**: Query and mutation testing with Spring GraphQL Test
+- **Security Tests**: Authentication and authorization testing for both REST and GraphQL
 - **Repository Tests**: Data layer testing with H2 in-memory database
 
 Run tests with:
@@ -137,6 +202,10 @@ spring.datasource.url=jdbc:postgresql://localhost:5432/makerspace
 spring.datasource.username=your_username
 spring.datasource.password=your_password
 spring.jpa.hibernate.ddl-auto=update
+
+# GraphQL Configuration
+spring.graphql.graphiql.enabled=true
+spring.graphql.graphiql.path=/graphiql
 ```
 
 3. **Build and run the backend**
@@ -145,7 +214,10 @@ mvn clean install
 mvn spring-boot:run
 ```
 
-The backend will be available at `http://localhost:8080`
+The backend will be available at:
+- **REST API**: `http://localhost:8080`
+- **GraphQL**: `http://localhost:8080/graphql`
+- **GraphiQL**: `http://localhost:8080/graphiql`
 
 ### Frontend Setup
 
@@ -159,9 +231,42 @@ The frontend will be available at `http://localhost:3000`
 
 ### Development Tools
 
-- **API Documentation**: Visit `http://localhost:8080/swagger-ui.html` to explore and test API endpoints
+- **REST API Documentation**: Visit `http://localhost:8080/swagger-ui.html` to explore and test REST endpoints
+- **GraphQL Playground**: Visit `http://localhost:8080/graphiql` for interactive GraphQL queries
 - **Database Console**: H2 console available during testing at `http://localhost:8080/h2-console`
 - **Hot Reload**: Both backend (Spring Boot DevTools) and frontend (Next.js) support hot reloading for development
+
+### Example GraphQL Queries
+
+```graphql
+# Get all workshops
+query {
+  workshops {
+    id
+    name
+    description
+    size
+    activities {
+      id
+      name
+    }
+  }
+}
+
+# Create a workshop (requires Admin role)
+mutation {
+  createWorkshop(input: {
+    name: "3D Printing Workshop"
+    description: "Learn 3D printing basics"
+    size: 150.0
+    activityIds: ["1", "2"]
+  }) {
+    id
+    name
+    size
+  }
+}
+```
 
 ---
 
@@ -172,14 +277,24 @@ makerspace/
 ├── src/main/java/com/github/pooya1361/makerspace/
 │   ├── auth/                    # Authentication controllers and DTOs
 │   ├── controller/              # REST controllers
+│   ├── graphql/                 # GraphQL controllers and resolvers
 │   ├── model/                   # JPA entities
 │   ├── dto/                     # Data Transfer Objects
 │   ├── mapper/                  # MapStruct mappers
 │   ├── repository/              # JPA repositories
 │   ├── security/                # Security configuration and JWT handling
 │   └── MakerspaceApplication.java
+├── src/main/resources/
+│   ├── graphql/                 # GraphQL schema definitions
+│   │   └── schema.graphqls
+│   └── application.properties
 ├── src/test/java/               # Test classes
 ├── webapp/                      # Next.js frontend application
+│   ├── app/
+│   │   ├── lib/features/api/    # RTK Query API slice (REST + GraphQL)
+│   │   ├── workshops/           # Workshop pages with SSR
+│   │   └── middleware.ts        # Next.js authentication middleware
+│   └── package.json
 └── pom.xml                      # Maven configuration
 ```
 
@@ -190,16 +305,17 @@ makerspace/
 ```
 ┌─────────────────┐    HTTPS     ┌─────────────────┐
 │   AWS Amplify   │◄─────────────┤     Users       │
-│   (Frontend)    │              │   (Browsers)    │
+│ (Next.js SSR)   │              │   (Browsers)    │
 └─────────┬───────┘              └─────────────────┘
           │
-          │ HTTPS API Calls
+          │ HTTPS API Calls (REST + GraphQL)
           ▼
 ┌─────────────────┐              ┌─────────────────┐
 │ Elastic         │◄─────────────┤ Application     │
 │ Beanstalk       │              │ Load Balancer   │
 │ (Spring Boot)   │              │ (HTTPS/HTTP)    │
-└─────────┬───────┘              └─────────────────┘
+│ REST + GraphQL  │              └─────────────────┘
+└─────────┬───────┘              
           │
           │ PostgreSQL Protocol
           ▼
@@ -213,25 +329,46 @@ makerspace/
 
 ## 🎯 Features Demonstrated
 
-- **Full-Stack Development**: Complete application from database to user interface
-- **RESTful API Design**: Proper HTTP methods, status codes, and resource modeling
-- **Authentication & Authorization**: JWT-based security with role-based access control
+- **Dual API Architecture**: Both REST and GraphQL endpoints running simultaneously
+- **Full-Stack SSR**: Next.js server-side rendering with authenticated data fetching
+- **Modern Frontend**: React with TypeScript, Redux state management, and responsive design
+- **GraphQL Integration**: Type-safe GraphQL with Spring GraphQL and client-side caching
+- **Advanced Authentication**: JWT-based security with Next.js middleware and role-based access
 - **Database Integration**: Complex relationships and queries with PostgreSQL
 - **Cloud Deployment**: Production-ready deployment on AWS with proper scaling
-- **Modern Frontend**: React with TypeScript, Redux state management, and responsive design
-- **Testing**: Comprehensive test suite with unit and integration tests
-- **API Documentation**: Auto-generated interactive documentation with Swagger
+- **Testing**: Comprehensive test suite with unit, integration, and GraphQL tests
+- **API Documentation**: Auto-generated interactive documentation for both REST and GraphQL
 - **Security Best Practices**: HTTPS, password hashing, CORS, and secure cookie handling
+- **Performance Optimization**: RTK Query caching, SSR, and optimized bundle sizes
 
 ---
 
 ## 📈 Performance & Scalability
 
+- **Server-Side Rendering**: Faster initial page loads and better SEO
+- **RTK Query Caching**: Intelligent client-side caching reduces API calls
+- **GraphQL Efficiency**: Request only needed data, reducing network overhead
 - **Auto-scaling**: Elastic Beanstalk automatically scales based on traffic
 - **Database Performance**: RDS with proper indexing and connection pooling
 - **CDN**: Amplify provides global content delivery for frontend assets
-- **Caching**: Redux Toolkit Query provides intelligent client-side caching
 - **Load Balancing**: Application Load Balancer distributes traffic across instances
+
+---
+
+## 🔄 Migration Strategy
+
+The application demonstrates a **gradual migration approach** from REST to GraphQL:
+
+1. **Phase 1**: REST API foundation (✅ Complete)
+2. **Phase 2**: GraphQL endpoints alongside REST (✅ Complete)
+3. **Phase 3**: Client-side GraphQL adoption with SSR (✅ Complete)
+4. **Phase 4**: Gradual REST endpoint deprecation (🔄 In Progress)
+
+This approach allows for:
+- **Zero downtime** during migration
+- **Gradual team adoption** of GraphQL
+- **Fallback options** if issues arise
+- **Performance comparison** between approaches
 
 ---
 
@@ -239,8 +376,8 @@ makerspace/
 
 **Pouya Mahpeikar**  
 Full-Stack Developer  
-[GitHub](https://github.com/pooya1361) | [LinkedIn](https://www.linkedin.com/in/pouya-mahpeikar-2b473a53/) | [Portfolio](#)
+[GitHub](https://github.com/pooya1361) | [LinkedIn](https://www.linkedin.com/in/pouya-mahpeikar-2b473a53/) | [Portfolio](https://portfolio.mahpeikar.se)
 
 ---
 
-*This project showcases modern full-stack development practices, cloud deployment expertise, and production-ready software engineering skills.*
+*This project showcases modern full-stack development practices, including dual API architecture (REST + GraphQL), server-side rendering, cloud deployment expertise, and production-ready software engineering skills.*

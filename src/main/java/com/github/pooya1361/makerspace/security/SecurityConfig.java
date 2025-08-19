@@ -28,7 +28,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
@@ -55,6 +55,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/**").hasAnyAuthority("ADMIN", "SUPERADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/**").hasAnyAuthority("ADMIN", "SUPERADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/**").hasAnyAuthority("ADMIN", "SUPERADMIN")
+                        .requestMatchers("/graphql").authenticated()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
