@@ -44,9 +44,9 @@ export default function LessonForm({ initialLesson }: LessonFormProps) {
 
     // Handle the case where lesson is deleted
     useEffect(() => {
-        if (isError && error && 'status' in error && error.status === 404) {
+        if (isError && error && (error as any)?.status === 404) {
             console.log('Lesson not found, redirecting...');
-            router.replace('/lessons'); // Use replace instead of push
+            router.replace('/lessons');
             return;
         }
     }, [isError, error, router]);
