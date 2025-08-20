@@ -12,17 +12,15 @@ interface LoginResponse {
     user: UserResponseDTO
 }
 
-const isServer = typeof window === "undefined";
-
 const baseQuery = fetchBaseQuery({
-    baseUrl: isServer ? process.env.NEXT_PUBLIC_API_BASE_URL || 'https://localhost:8080' : '/api', // Goes to proxy
-    credentials: 'include', // For client-side requests
+    baseUrl: '/api', // Always use proxy on client
+    credentials: 'include',
 });
 
-const baseQueryWithAuth = async (args: any, api: any, extraOptions: { serverCookies?: string }) => {
+const baseQueryWithAuth = async (args: any, api: any, extraOptions: any) => {
     console.log(`🔍 RTK Query: ${api.type} ${api.endpoint}`);
 
-    // ✅ Server-side: Use cookies passed via extraOptions (no import needed!)
+    // Server-side: Use cookies via extraOptions
     if (typeof window === 'undefined' && extraOptions?.serverCookies) {
         console.log('✅ Server: Using server-provided cookies');
 
@@ -30,22 +28,27 @@ const baseQueryWithAuth = async (args: any, api: any, extraOptions: { serverCook
             ? { url: args, headers: {} }
             : { ...args, headers: { ...args.headers } };
 
-        if (isServer && extraOptions?.serverCookies) {
-            modifiedArgs.headers['Cookie'] = extraOptions.serverCookies;
+        modifiedArgs.headers['Cookie'] = extraOptions.serverCookies;
+
+        // Use direct fetch for server-side with backend URL
+        const backendUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://localhost:8080';
+        const fullUrl = `${backendUrl}${modifiedArgs.url}`;
+
+        try {
+            const response = await fetch(fullUrl, {
+                method: modifiedArgs.method || 'GET',
+                headers: modifiedArgs.headers,
+                body: modifiedArgs.body ? JSON.stringify(modifiedArgs.body) : undefined,
+            });
+
+            const data = await response.json();
+            return { data };
+        } catch (error) {
+            return { error: { status: 500, data: error } };
         }
-
-        const result = await baseQuery(modifiedArgs, api, extraOptions);
-
-        if (result.error) {
-            console.log('❌ Server RTK Query Error:', result.error.status);
-        } else {
-            console.log('✅ Server RTK Query Success');
-        }
-
-        return result;
     }
 
-    // ✅ Client-side: Use normal credentials: 'include'
+    // Client-side: Use proxy
     const result = await baseQuery(args, api, extraOptions);
 
     if (result.error) {
@@ -54,8 +57,7 @@ const baseQueryWithAuth = async (args: any, api: any, extraOptions: { serverCook
             endpoint: typeof args === 'string' ? args : args.url,
         });
 
-        // Handle 401 on client
-        if (typeof window !== 'undefined' && result.error.status === 401) {
+        if (result.error.status === 401 && typeof window !== 'undefined') {
             console.warn('❌ Client: Unauthorized, redirecting to login');
             window.location.href = '/login';
         }
@@ -73,7 +75,7 @@ export const apiSlice = createApi({
     endpoints: (builder) => ({
         login: builder.mutation<LoginResponse, LoginRequest>({
             query: (credentials) => ({
-                url: '/api/auth/login',
+                url: '/auth/login',
                 method: 'POST',
                 body: credentials,
             }),
@@ -92,7 +94,7 @@ export const apiSlice = createApi({
 
         logout: builder.mutation<void, void>({
             query: () => ({
-                url: '/api/auth/logout',
+                url: '/auth/logout',
                 method: 'POST',
                 responseHandler: 'text'
             }),
@@ -115,29 +117,29 @@ export const apiSlice = createApi({
 
         register: builder.mutation<UserResponseDTO, Omit<UserCreateDTO, 'id'>>({
             query: (userData) => ({
-                url: '/api/auth/register',
+                url: '/auth/register',
                 method: 'POST',
                 body: userData,
             }),
         }),
 
         getCurrentUser: builder.query<any, void>({
-            query: () => '/api/auth/me',
+            query: () => '/auth/me',
             providesTags: ['User'],
         }),
 
         getOverallSummary: builder.query<SummaryResponseDTO, void>({
-            query: () => '/api/summary',
+            query: () => '/summary',
             providesTags: ['Summary'], // Tag for caching
         }),
 
         getAvailableLessons: builder.query<ScheduledLessonResponseDTO[], void>({
-            query: () => '/api/summary/available-lessons',
+            query: () => '/summary/available-lessons',
             providesTags: ['Summary'],
         }),
 
         getUsers: builder.query<UserResponseDTO[], void>({
-            query: () => '/api/users',
+            query: () => '/users',
             providesTags: ['User'], // Tag for caching
         }),
 
@@ -146,7 +148,7 @@ export const apiSlice = createApi({
         */
         addVote: builder.mutation<VoteResponseDTO, Omit<VoteCreateDTO, 'id'>>({
             query: (newVote) => ({
-                url: '/api/votes',
+                url: '/votes',
                 method: 'POST',
                 body: newVote,
             }),
@@ -155,7 +157,7 @@ export const apiSlice = createApi({
 
         deleteVote: builder.mutation<void, number>({
             query: (id) => ({
-                url: `/api/votes/${id}`,
+                url: `/votes/${id}`,
                 method: 'DELETE',
             }),
             invalidatesTags: (result, error, id) => ['ProposedTimeSlot', { type: 'ProposedTimeSlot', id }, 'ScheduledLesson', 'Vote'],
@@ -165,13 +167,13 @@ export const apiSlice = createApi({
          * ------------------------------------------------------------ Proposed time slot ------------------------------------------------------------
         */
         getProposedTimeSlotById: builder.query<ProposedTimeSlotResponseDTO, string>({
-            query: (id) => `/api/proposed-time-slots/${id}`,
+            query: (id) => `/proposed-time-slots/${id}`,
             providesTags: (result, error, id) => [{ type: 'ProposedTimeSlot', id }],
         }),
 
         addProposedTimeSlot: builder.mutation<ProposedTimeSlotResponseDTO, Omit<ProposedTimeSlotCreateDTO, 'id'>>({
             query: (newProposedTimeSlot) => ({
-                url: '/api/proposed-time-slots',
+                url: '/proposed-time-slots',
                 method: 'POST',
                 body: newProposedTimeSlot,
             }),
@@ -180,7 +182,7 @@ export const apiSlice = createApi({
 
         updateProposedTimeSlot: builder.mutation<ProposedTimeSlotResponseDTO, ProposedTimeSlotCreateDTO>({
             query: ({ id, ...patch }) => ({
-                url: `/api/proposed-time-slots/${id}`,
+                url: `/proposed-time-slots/${id}`,
                 method: 'PATCH',
                 body: patch,
             }),
@@ -189,7 +191,7 @@ export const apiSlice = createApi({
 
         deleteProposedTimeSlot: builder.mutation<void, number>({
             query: (id) => ({
-                url: `/api/proposed-time-slots/${id}`,
+                url: `/proposed-time-slots/${id}`,
                 method: 'DELETE',
             }),
             invalidatesTags: (result, error, id) => ['ProposedTimeSlot', { type: 'ProposedTimeSlot', id }, 'ScheduledLesson'],
@@ -199,12 +201,12 @@ export const apiSlice = createApi({
         * ------------------------------------------------------------ Scheduled Lesson ------------------------------------------------------------
         */
         getScheduledLessons: builder.query<ScheduledLessonResponseDTO[], void>({
-            query: () => '/api/scheduled-lessons',
+            query: () => '/scheduled-lessons',
             providesTags: ['ScheduledLesson'], // Tag for caching
         }),
 
         getScheduledLessonById: builder.query<ScheduledLessonResponseDTO, string>({
-            query: (id) => `/api/scheduled-lessons/${id}`,
+            query: (id) => `/scheduled-lessons/${id}`,
             transformResponse: (response: ScheduledLessonResponseDTO) => {
                 return {
                     ...response,
@@ -222,7 +224,7 @@ export const apiSlice = createApi({
 
         createScheduledLesson: builder.mutation<ScheduledLessonResponseDTO, Omit<ScheduledLessonCreateDTO, 'id'>>({
             query: (newScheduledLesson) => ({
-                url: '/api/scheduled-lessons',
+                url: '/scheduled-lessons',
                 method: 'POST',
                 body: newScheduledLesson,
             }),
@@ -231,7 +233,7 @@ export const apiSlice = createApi({
 
         updateScheduledLesson: builder.mutation<ScheduledLessonResponseDTO, ScheduledLessonCreateDTO>({ // ScheduledLesson includes id
             query: ({ id, ...patch }) => ({
-                url: `/api/scheduled-lessons/${id}`,
+                url: `/scheduled-lessons/${id}`,
                 method: 'PATCH', // Or PATCH depending on your API
                 body: patch,
             }),
@@ -240,7 +242,7 @@ export const apiSlice = createApi({
 
         deleteScheduledLesson: builder.mutation<void, string>({ // Pass id as string
             query: (id) => ({
-                url: `/api/scheduled-lessons/${id}`,
+                url: `/scheduled-lessons/${id}`,
                 method: 'DELETE',
             }),
             invalidatesTags: (result, error, id) => ['ScheduledLesson', { type: 'ScheduledLesson', id }, 'Workshop'],
@@ -250,23 +252,23 @@ export const apiSlice = createApi({
          * ------------------------------------------------------------ Lesson-User ------------------------------------------------------------
          */
         getLessonUsers: builder.query<LessonUserResponseDTO[], void>({
-            query: () => '/api/lesson-users',
+            query: () => '/lesson-users',
             providesTags: ['LessonUser'],
         }),
 
         getLessonUserById: builder.query<LessonUser, string>({
-            query: (id) => `/api/lesson-users/${id}`,
+            query: (id) => `/lesson-users/${id}`,
             providesTags: (result, error, id) => [{ type: 'LessonUser', id }],
         }),
 
         getLessonsByUserId: builder.query<LessonUserResponseDTO[], string>({
-            query: (id) => `/api/lesson-users/user/${id}`,
+            query: (id) => `/lesson-users/user/${id}`,
             providesTags: (result, error, id) => [{ type: 'LessonUser', id }],
         }),
 
         createLessonUser: builder.mutation<LessonUserResponseDTO, Omit<LessonUserCreateDTO, 'id'>>({
             query: (newLessonUser) => ({
-                url: '/api/lesson-users',
+                url: '/lesson-users',
                 method: 'POST',
                 body: newLessonUser,
             }),
@@ -275,7 +277,7 @@ export const apiSlice = createApi({
 
         updateLessonUser: builder.mutation<LessonUserResponseDTO, LessonUserCreateDTO>({
             query: ({ id, ...patch }) => ({
-                url: `/api/lesson-users/${id}`,
+                url: `/lesson-users/${id}`,
                 method: 'PATCH',
                 body: patch,
             }),
@@ -284,7 +286,7 @@ export const apiSlice = createApi({
 
         deleteLessonUser: builder.mutation<void, string>({
             query: (id) => ({
-                url: `/api/lesson-users/${id}`,
+                url: `/lesson-users/${id}`,
                 method: 'DELETE',
             }),
             invalidatesTags: (result, error, id) => ['LessonUser', { type: 'LessonUser', id }, 'Summary'],
@@ -294,18 +296,18 @@ export const apiSlice = createApi({
          * ------------------------------------------------------------ Lesson ------------------------------------------------------------
          */
         getLessons: builder.query<LessonResponseDTO[], void>({
-            query: () => '/api/lessons',
+            query: () => '/lessons',
             providesTags: ['Lesson'], // Tag for caching
         }),
 
         getLessonById: builder.query<Lesson, string>({
-            query: (id) => `/api/lessons/${id}`,
+            query: (id) => `/lessons/${id}`,
             providesTags: (result, error, id) => [{ type: 'Lesson', id }],
         }),
 
         createLesson: builder.mutation<LessonResponseDTO, Omit<LessonCreateDTO, 'id'>>({
             query: (newLesson) => ({
-                url: '/api/lessons',
+                url: '/lessons',
                 method: 'POST',
                 body: newLesson,
             }),
@@ -314,7 +316,7 @@ export const apiSlice = createApi({
 
         updateLesson: builder.mutation<LessonResponseDTO, LessonCreateDTO>({ // Lesson includes id
             query: ({ id, ...patch }) => ({
-                url: `/api/lessons/${id}`,
+                url: `/lessons/${id}`,
                 method: 'PATCH', // Or PATCH depending on your API
                 body: patch,
             }),
@@ -323,7 +325,7 @@ export const apiSlice = createApi({
 
         deleteLesson: builder.mutation<void, string>({ // Pass id as string
             query: (id) => ({
-                url: `/api/lessons/${id}`,
+                url: `/lessons/${id}`,
                 method: 'DELETE',
             }),
             invalidatesTags: (result, error, id) => ['Lesson', { type: 'Lesson', id }, 'Workshop'],
@@ -333,7 +335,7 @@ export const apiSlice = createApi({
          * ------------------------------------------------------------ Workshop ------------------------------------------------------------
          */
         getWorkshops: builder.query<WorkshopResponseDTO[], void>({
-            query: () => '/api/workshops',
+            query: () => '/workshops',
             providesTags: ['Workshop'], // Tag for caching
         }),
 
@@ -369,7 +371,7 @@ export const apiSlice = createApi({
 
         createWorkshop: builder.mutation<WorkshopResponseDTO, Omit<WorkshopCreateDTO, 'id'>>({ // Returns WorkshopResponseDTO, takes WorkshopCreateDTO without ID
             query: (newWorkshop) => ({
-                url: '/api/workshops',
+                url: '/workshops',
                 method: 'POST',
                 body: newWorkshop,
             }),
@@ -406,7 +408,7 @@ export const apiSlice = createApi({
         }),
 
         getWorkshopById: builder.query<WorkshopResponseDTO, string>({
-            query: (id) => `/api/workshops/${id}`,
+            query: (id) => `/workshops/${id}`,
             // Invalidate specific workshop detail cache if you have it
             providesTags: (result, error, id) => [{ type: 'Workshop', id }],
         }),
@@ -441,7 +443,7 @@ export const apiSlice = createApi({
 
         updateWorkshop: builder.mutation<WorkshopResponseDTO, WorkshopCreateDTO>({ // Workshop includes id
             query: ({ id, ...patch }) => ({
-                url: `/api/workshops/${id}`,
+                url: `/workshops/${id}`,
                 method: 'PATCH', // Or PATCH depending on your API
                 body: patch,
             }),
@@ -479,7 +481,7 @@ export const apiSlice = createApi({
 
         deleteWorkshop: builder.mutation<void, string>({ // Pass id as string
             query: (id) => ({
-                url: `/api/workshops/${id}`,
+                url: `/workshops/${id}`,
                 method: 'DELETE',
             }),
             // Invalidate the list and the specific workshop item
@@ -512,13 +514,13 @@ export const apiSlice = createApi({
          * ------------------------------------------------------------ Activity ------------------------------------------------------------
          */
         getActivities: builder.query<ActivityResponseDTO[], void>({
-            query: () => '/api/activities', // Adjust to your actual API endpoint
+            query: () => '/activities', // Adjust to your actual API endpoint
             providesTags: ['Activity'], // Define a new tag type if needed
         }),
 
         createActivity: builder.mutation<ActivityResponseDTO, Omit<ActivityCreateDTO, 'id'>>({
             query: (newActivity) => ({
-                url: '/api/activities',
+                url: '/activities',
                 method: 'POST',
                 body: newActivity,
             }),
@@ -526,13 +528,13 @@ export const apiSlice = createApi({
         }),
 
         getActivityById: builder.query<ActivityResponseDTO, string>({
-            query: (id) => `/api/activities/${id}`,
+            query: (id) => `/activities/${id}`,
             providesTags: (result, error, id) => [{ type: 'Activity', id }],
         }),
 
         updateActivity: builder.mutation<ActivityResponseDTO, ActivityCreateDTO>({ // Activity includes id
             query: ({ id, ...patch }) => ({
-                url: `/api/activities/${id}`,
+                url: `/activities/${id}`,
                 method: 'PATCH', // Or PATCH depending on your API
                 body: patch,
             }),
@@ -541,7 +543,7 @@ export const apiSlice = createApi({
 
         deleteActivity: builder.mutation<void, string>({ // Pass id as string
             query: (id) => ({
-                url: `/api/activities/${id}`,
+                url: `/activities/${id}`,
                 method: 'DELETE',
             }),
             invalidatesTags: (result, error, id) => ['Activity', { type: 'Activity', id }, 'Workshop'],
