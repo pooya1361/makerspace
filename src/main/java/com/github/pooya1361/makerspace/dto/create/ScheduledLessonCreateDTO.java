@@ -21,6 +21,4 @@ public class ScheduledLessonCreateDTO {
     private Long lessonId;
     @NotNull(message = "Instructor user id cannot be null")
     private Long instructorUserId;
-
-
 }
