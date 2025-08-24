@@ -1,12 +1,25 @@
 # Makerspace Project
 
-🚀 **Live Demo**: [https://master.d31o1td403e37h.amplifyapp.com](https://master.d31o1td403e37h.amplifyapp.com)
+🚀 **Live Demo**: [https://makerspace.mahpeikar.se](https://makerspace.mahpeikar.se)
 
-📊 **API Documentation**: 
-- [REST API (Swagger UI)](https://d10bevpih9tc2u.cloudfront.net/swagger-ui.html)
-- [GraphQL Playground](https://d10bevpih9tc2u.cloudfront.net/graphiql) *(Development)*
+📊 **API Documentation**:
+- [REST API (Swagger UI)](https://api.makerspace.mahpeikar.se/swagger-ui.html)
+- [GraphQL Playground](https://api.makerspace.mahpeikar.se/graphiql) *(Development)*
 
 This project, "Makerspace," is a full-stack application designed to manage scheduled lessons, proposed time slots, and user interactions with comprehensive authentication and authorization. It demonstrates a modern technology stack deployed on **AWS** with robust security, testing practices, and **dual API architecture** supporting both REST and GraphQL.
+
+## 📋 Table of Contents
+
+- [Live Deployment](#-live-deployment)
+- [Technologies Used](#-technologies-used)
+- [Authentication & Security](#-authentication--security)
+- [API Architecture](#-api-architecture)
+- [Frontend Architecture](#-frontend-architecture)
+- [Testing](#-testing)
+- [Local Development](#-local-development)
+- [Deployment Architecture](#-deployment-architecture)
+- [Migration Strategy](#-migration-strategy)
+- [Developer](#-developer)
 
 ---
 
@@ -122,8 +135,8 @@ type WorkshopResponse {
 ```
 
 ### API Documentation
-- **REST API**: [Swagger UI](https://d10bevpih9tc2u.cloudfront.net/swagger-ui.html)
-- **GraphQL**: [GraphiQL Playground](https://d10bevpih9tc2u.cloudfront.net/graphiql)
+- **REST API**: [Swagger UI](https://api.makerspace.mahpeikar.se/swagger-ui.html)
+- **GraphQL**: [GraphiQL Playground](https://api.makerspace.mahpeikar.se/graphiql)
 - **OpenAPI JSON**: Available at `/v3/api-docs`
 
 ---
@@ -241,30 +254,30 @@ The frontend will be available at `http://localhost:3000`
 ```graphql
 # Get all workshops
 query {
-  workshops {
-    id
-    name
-    description
-    size
-    activities {
+   workshops {
       id
       name
-    }
-  }
+      description
+      size
+      activities {
+         id
+         name
+      }
+   }
 }
 
 # Create a workshop (requires Admin role)
 mutation {
-  createWorkshop(input: {
-    name: "3D Printing Workshop"
-    description: "Learn 3D printing basics"
-    size: 150.0
-    activityIds: ["1", "2"]
-  }) {
-    id
-    name
-    size
-  }
+   createWorkshop(input: {
+      name: "3D Printing Workshop"
+      description: "Learn 3D printing basics"
+      size: 150.0
+      activityIds: ["1", "2"]
+   }) {
+      id
+      name
+      size
+   }
 }
 ```
 

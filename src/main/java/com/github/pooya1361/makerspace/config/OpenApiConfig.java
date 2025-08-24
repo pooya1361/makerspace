@@ -35,6 +35,9 @@ public class OpenApiConfig {
     @Value("${app.base-url:http://localhost}")
     private String baseUrl;
 
+    @Value("${spring.profiles.active:local}") // default = local
+    private String activeProfile;
+
     @Bean
     public OpenAPI makerspaceOpenAPI() {
         // Define the global security requirement
@@ -44,8 +47,8 @@ public class OpenApiConfig {
         Info info = new Info()
                 .contact(new Contact()
                         .name("Pouya Mahpeikar")
-                        .email("pooya1361@gmail.com")
-                        .url("https://www.makerspace.com")
+                        .email("pouya@mahpeikar.se")
+                        .url("https://pouya.mahpeikar.se")
                 )
                 .description("OpenAPI documentation for Makerspace Application")
                 .title("Makerspace API - OpenAPI 3.0")
@@ -58,18 +61,16 @@ public class OpenApiConfig {
 
         List<Server> servers = new ArrayList<>();
 
-        String environment = System.getenv("ENVIRONMENT"); // Set this in AWS
-
-        if ("production".equals(environment) || "aws".equals(environment)) {
-            // Create server for your actual AWS deployment
-            Server awsServer = new Server();
-            awsServer.setUrl("https://d10bevpih9tc2u.cloudfront.net" + ":" + port);
-            awsServer.setDescription("AWS Production Server");
+        if ("prod".equalsIgnoreCase(activeProfile)) {
+            Server prodServer = new Server();
+            prodServer.setUrl("https://api.makerspace.mahpeikar.se");
+            prodServer.setDescription("AWS Production Server");
+            servers.add(prodServer);
         } else {
-            // Keep localhost for local development
             Server localServer = new Server();
             localServer.setUrl(baseUrl + ":" + port);
             localServer.setDescription("Local Development Server");
+            servers.add(localServer);
         }
 
         return new OpenAPI()
