@@ -60,11 +60,13 @@ class VoteControllerTest {
         // Create summary DTOs for nested objects
         UserSummaryDTO user1 = new UserSummaryDTO();
         user1.setId(1L);
-        user1.setUsername("user1");
+        user1.setFirstName("user1");
+        user1.setLastName("user1");
 
         UserSummaryDTO user2 = new UserSummaryDTO();
         user2.setId(2L);
-        user2.setUsername("user2");
+        user2.setFirstName("user2");
+        user2.setLastName("user2");
 
         ProposedTimeSlotSummaryDTO timeSlot = new ProposedTimeSlotSummaryDTO();
         timeSlot.setId(1L);

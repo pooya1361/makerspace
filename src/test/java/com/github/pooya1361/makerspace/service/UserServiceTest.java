@@ -14,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Arrays;
 import java.util.List;
@@ -22,6 +23,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,6 +34,9 @@ class UserServiceTest {
 
     @Mock
     private UserMapper userMapper;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
 
     @InjectMocks
     private UserService userService;
@@ -343,14 +348,53 @@ class UserServiceTest {
     // ==================== UPDATE USER TESTS ====================
 
     @Test
-    void updateUser_Success() {
+    void updateUser_WithPassword_Success() {
         // given
         UserCreateDTO updateDTO = new UserCreateDTO();
         updateDTO.setFirstName("John Updated");
         updateDTO.setLastName("Doe Updated");
         updateDTO.setEmail("john.updated@example.com");
         updateDTO.setPassword("newPlainPassword");
-        updateDTO.setUserType(UserType.INSTRUCTOR); // Promote to instructor
+        updateDTO.setUserType(UserType.INSTRUCTOR);
+
+        UserResponseDTO updatedResponseDTO = new UserResponseDTO();
+        updatedResponseDTO.setId(1L);
+        updatedResponseDTO.setFirstName("John Updated");
+        updatedResponseDTO.setLastName("Doe Updated");
+        updatedResponseDTO.setEmail("john.updated@example.com");
+        updatedResponseDTO.setUserType(UserType.INSTRUCTOR);
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(passwordEncoder.encode("newPlainPassword")).thenReturn("encodedNewPassword");
+        when(userRepository.save(user)).thenReturn(user);
+        when(userMapper.toDto(user)).thenReturn(updatedResponseDTO);
+
+        // when
+        UserResponseDTO result = userService.updateUser(1L, updateDTO);
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.getFirstName()).isEqualTo("John Updated");
+        assertThat(result.getLastName()).isEqualTo("Doe Updated");
+        assertThat(result.getEmail()).isEqualTo("john.updated@example.com");
+        assertThat(result.getUserType()).isEqualTo(UserType.INSTRUCTOR);
+
+        verify(userRepository).findById(1L);
+        verify(userMapper).updateUserFromDto(updateDTO, user);
+        verify(passwordEncoder).encode("newPlainPassword");
+        verify(userRepository).save(user);
+        verify(userMapper).toDto(user);
+    }
+
+    @Test
+    void updateUser_WithNullPassword_DoesNotEncodePassword() {
+        // given
+        UserCreateDTO updateDTO = new UserCreateDTO();
+        updateDTO.setFirstName("John Updated");
+        updateDTO.setLastName("Doe Updated");
+        updateDTO.setEmail("john.updated@example.com");
+        updateDTO.setPassword(null); // Null password
+        updateDTO.setUserType(UserType.INSTRUCTOR);
 
         UserResponseDTO updatedResponseDTO = new UserResponseDTO();
         updatedResponseDTO.setId(1L);
@@ -369,12 +413,45 @@ class UserServiceTest {
         // then
         assertThat(result).isNotNull();
         assertThat(result.getFirstName()).isEqualTo("John Updated");
-        assertThat(result.getLastName()).isEqualTo("Doe Updated");
-        assertThat(result.getEmail()).isEqualTo("john.updated@example.com");
-        assertThat(result.getUserType()).isEqualTo(UserType.INSTRUCTOR);
 
         verify(userRepository).findById(1L);
         verify(userMapper).updateUserFromDto(updateDTO, user);
+        verify(passwordEncoder, never()).encode(anyString());
+        verify(userRepository).save(user);
+        verify(userMapper).toDto(user);
+    }
+
+    @Test
+    void updateUser_WithEmptyPassword_DoesNotEncodePassword() {
+        // given
+        UserCreateDTO updateDTO = new UserCreateDTO();
+        updateDTO.setFirstName("John Updated");
+        updateDTO.setLastName("Doe Updated");
+        updateDTO.setEmail("john.updated@example.com");
+        updateDTO.setPassword("   "); // Empty/whitespace password
+        updateDTO.setUserType(UserType.INSTRUCTOR);
+
+        UserResponseDTO updatedResponseDTO = new UserResponseDTO();
+        updatedResponseDTO.setId(1L);
+        updatedResponseDTO.setFirstName("John Updated");
+        updatedResponseDTO.setLastName("Doe Updated");
+        updatedResponseDTO.setEmail("john.updated@example.com");
+        updatedResponseDTO.setUserType(UserType.INSTRUCTOR);
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(userRepository.save(user)).thenReturn(user);
+        when(userMapper.toDto(user)).thenReturn(updatedResponseDTO);
+
+        // when
+        UserResponseDTO result = userService.updateUser(1L, updateDTO);
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.getFirstName()).isEqualTo("John Updated");
+
+        verify(userRepository).findById(1L);
+        verify(userMapper).updateUserFromDto(updateDTO, user);
+        verify(passwordEncoder, never()).encode(anyString());
         verify(userRepository).save(user);
         verify(userMapper).toDto(user);
     }
@@ -392,6 +469,7 @@ class UserServiceTest {
 
         verify(userRepository).findById(1L);
         verify(userRepository, never()).save(any());
+        verify(passwordEncoder, never()).encode(anyString());
     }
 
     @Test
@@ -401,8 +479,8 @@ class UserServiceTest {
         promoteToAdminDTO.setFirstName("John");
         promoteToAdminDTO.setLastName("Doe");
         promoteToAdminDTO.setEmail("john.doe@example.com");
-        promoteToAdminDTO.setPassword("samePassword");
-        promoteToAdminDTO.setUserType(UserType.ADMIN); // Promote to admin
+        promoteToAdminDTO.setPassword("newAdminPassword");
+        promoteToAdminDTO.setUserType(UserType.ADMIN);
 
         UserResponseDTO adminResponseDTO = new UserResponseDTO();
         adminResponseDTO.setId(1L);
@@ -412,6 +490,7 @@ class UserServiceTest {
         adminResponseDTO.setUserType(UserType.ADMIN);
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(passwordEncoder.encode("newAdminPassword")).thenReturn("encodedAdminPassword");
         when(userRepository.save(user)).thenReturn(user);
         when(userMapper.toDto(user)).thenReturn(adminResponseDTO);
 
@@ -424,6 +503,44 @@ class UserServiceTest {
 
         verify(userRepository).findById(1L);
         verify(userMapper).updateUserFromDto(promoteToAdminDTO, user);
+        verify(passwordEncoder).encode("newAdminPassword");
+        verify(userRepository).save(user);
+        verify(userMapper).toDto(user);
+    }
+
+    @Test
+    void updateUser_OnlyEmailChange_WithoutPassword() {
+        // given - test updating only email without password change
+        UserCreateDTO emailUpdateDTO = new UserCreateDTO();
+        emailUpdateDTO.setFirstName("John");
+        emailUpdateDTO.setLastName("Doe");
+        emailUpdateDTO.setEmail("john.newemail@example.com");
+        emailUpdateDTO.setPassword(null); // No password change
+        emailUpdateDTO.setUserType(UserType.NORMAL);
+
+        UserResponseDTO emailUpdatedResponse = new UserResponseDTO();
+        emailUpdatedResponse.setId(1L);
+        emailUpdatedResponse.setFirstName("John");
+        emailUpdatedResponse.setLastName("Doe");
+        emailUpdatedResponse.setEmail("john.newemail@example.com");
+        emailUpdatedResponse.setUserType(UserType.NORMAL);
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(userRepository.save(user)).thenReturn(user);
+        when(userMapper.toDto(user)).thenReturn(emailUpdatedResponse);
+
+        // when
+        UserResponseDTO result = userService.updateUser(1L, emailUpdateDTO);
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.getEmail()).isEqualTo("john.newemail@example.com");
+        assertThat(result.getFirstName()).isEqualTo("John");
+        assertThat(result.getUserType()).isEqualTo(UserType.NORMAL);
+
+        verify(userRepository).findById(1L);
+        verify(userMapper).updateUserFromDto(emailUpdateDTO, user);
+        verify(passwordEncoder, never()).encode(anyString());
         verify(userRepository).save(user);
         verify(userMapper).toDto(user);
     }
@@ -499,41 +616,5 @@ class UserServiceTest {
         verify(userMapper).toEntity(specialNameDTO);
         verify(userRepository).save(specialNameUser);
         verify(userMapper).toDto(specialNameUser);
-    }
-
-    @Test
-    void updateUser_OnlyEmailChange_Success() {
-        // given - test updating only email
-        UserCreateDTO emailUpdateDTO = new UserCreateDTO();
-        emailUpdateDTO.setFirstName("John"); // Same
-        emailUpdateDTO.setLastName("Doe"); // Same
-        emailUpdateDTO.setEmail("john.newemail@example.com"); // Changed
-        emailUpdateDTO.setPassword("samePassword"); // Same
-        emailUpdateDTO.setUserType(UserType.NORMAL); // Same
-
-        UserResponseDTO emailUpdatedResponse = new UserResponseDTO();
-        emailUpdatedResponse.setId(1L);
-        emailUpdatedResponse.setFirstName("John");
-        emailUpdatedResponse.setLastName("Doe");
-        emailUpdatedResponse.setEmail("john.newemail@example.com");
-        emailUpdatedResponse.setUserType(UserType.NORMAL);
-
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(userRepository.save(user)).thenReturn(user);
-        when(userMapper.toDto(user)).thenReturn(emailUpdatedResponse);
-
-        // when
-        UserResponseDTO result = userService.updateUser(1L, emailUpdateDTO);
-
-        // then
-        assertThat(result).isNotNull();
-        assertThat(result.getEmail()).isEqualTo("john.newemail@example.com");
-        assertThat(result.getFirstName()).isEqualTo("John"); // Unchanged
-        assertThat(result.getUserType()).isEqualTo(UserType.NORMAL); // Unchanged
-
-        verify(userRepository).findById(1L);
-        verify(userMapper).updateUserFromDto(emailUpdateDTO, user);
-        verify(userRepository).save(user);
-        verify(userMapper).toDto(user);
     }
 }

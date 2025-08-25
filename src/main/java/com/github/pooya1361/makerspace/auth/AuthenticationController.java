@@ -93,6 +93,7 @@ public class AuthenticationController {
                 .maxAge(7 * 24 * 60 * 60)
                 .secure(isSecure)
                 .sameSite(isSecure ? "None" : "Lax")
+                .domain(isSecure ? ".mahpeikar.se" : null)
                 .build();
 
         System.out.println("Cookie: " + cookieBuilder.toString());

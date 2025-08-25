@@ -11,7 +11,8 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class UserSummaryDTO {
     private Long id;
-    private String username;
+    private String firstName;
+    private String lastName;
     private String email;
     private UserType userType;
 }

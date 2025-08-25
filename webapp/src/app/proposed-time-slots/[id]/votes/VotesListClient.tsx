@@ -85,7 +85,7 @@ export default function VotesListClient({ proposedTimeSlotId }: VotesListClientP
                             <tbody>
                                 {votes.map(vote => (
                                     <tr key={vote.id} className="hover:bg-gray-50">
-                                        <td className="py-2 px-4 border-b text-sm text-gray-800">{vote.user?.username || 'N/A'}</td>
+                                        <td className="py-2 px-4 border-b text-sm text-gray-800">{`${vote.user.firstName} ${vote.user.lastName}` || 'N/A'}</td>
                                         <td className="py-2 px-4 border-b text-sm text-gray-800">{vote.user?.email}</td>
                                         {/* Add other vote data */}
                                     </tr>

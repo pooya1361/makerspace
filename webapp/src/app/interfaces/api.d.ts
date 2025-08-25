@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-// Generated using typescript-generator version 3.2.1263 on 2025-08-23 23:36:47.
+// Generated using typescript-generator version 3.2.1263 on 2025-08-25 09:28:39.
 
 export interface ActivityCreateDTO {
     id: number;
@@ -195,7 +195,8 @@ export interface WorkshopSummaryDTO {
 
 export interface UserSummaryDTO {
     id: number;
-    username: string;
+    firstName: string;
+    lastName: string;
     email: string;
     userType: UserType;
 }
@@ -231,12 +232,12 @@ export interface GrantedAuthority extends Serializable {
 
 export interface UserDetails extends Serializable {
     password: string;
-    authorities: GrantedAuthority[];
-    accountNonLocked: boolean;
     enabled: boolean;
     username: string;
-    credentialsNonExpired: boolean;
+    authorities: GrantedAuthority[];
+    accountNonLocked: boolean;
     accountNonExpired: boolean;
+    credentialsNonExpired: boolean;
 }
 
 export interface Serializable {
