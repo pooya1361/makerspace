@@ -173,6 +173,54 @@ const { data: workshops } = useGetWorkshopsGraphQLQuery();
 
 ---
 
+## ♿ Accessibility & WCAG Compliance
+
+This application is built with accessibility as a core requirement, following **WCAG 2.1 AA guidelines** to ensure usability for all users, including those with disabilities.
+
+### Accessibility Features
+
+* **Semantic HTML**: Proper use of heading hierarchy, landmarks, and semantic elements (`<article>`, `<nav>`, `<main>`)
+* **Keyboard Navigation**: Full keyboard accessibility with visible focus indicators and logical tab order
+* **Screen Reader Support**: ARIA labels, roles, and properties for assistive technology compatibility
+* **Color Contrast**: All text meets WCAG AA contrast ratio requirements (4.5:1 minimum)
+* **Form Accessibility**: Properly associated labels, error messages, and validation feedback
+* **Focus Management**: Automatic focus handling in modals and dynamic content
+* **Motion Preferences**: Respects `prefers-reduced-motion` for users sensitive to animations
+
+### WCAG Compliance Implementation
+
+* **Form Components**: All forms include proper label associations, required field indicators, and field-specific error messages
+* **Modal Dialogs**: Accessible confirmation dialogs with focus trapping and keyboard support (Escape to close)
+* **Interactive Elements**: Buttons and links with descriptive labels and appropriate ARIA attributes
+* **Loading States**: Screen reader announcements for dynamic content changes
+* **Error Handling**: Accessible error messages with `role="alert"` for immediate user feedback
+* **Navigation**: Skip links and proper heading structure for easy page navigation
+
+### Accessibility Testing
+
+The application undergoes regular accessibility testing using:
+* **Automated Testing**: axe-core integration for continuous accessibility monitoring
+* **Manual Testing**: Keyboard navigation and screen reader testing
+* **Color Contrast**: WebAIM Contrast Checker validation for all color combinations
+* **WCAG Audits**: Regular compliance audits against WCAG 2.1 AA standards
+
+### Screen Reader Compatibility
+
+Tested and optimized for:
+* **NVDA** (Windows)
+* **JAWS** (Windows) 
+* **VoiceOver** (macOS)
+* **Orca** (Linux)
+
+### Accessibility Standards
+
+* **WCAG 2.1 Level AA**: Full compliance with Web Content Accessibility Guidelines
+* **Section 508**: US federal accessibility requirements
+* **ADA Compliance**: Americans with Disabilities Act digital accessibility standards
+* **EN 301 549**: European accessibility standard for ICT products and services
+
+---
+
 ## 🧪 Testing
 
 The project includes comprehensive testing coverage:

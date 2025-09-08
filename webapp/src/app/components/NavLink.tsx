@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import React, { ReactNode } from 'react';
+import { ReactNode } from 'react';
 
 // Define the props interface for NavLink
 interface NavLinkProps {
@@ -26,7 +26,7 @@ function NavLink({ href, children, currentPath, onSelect }: NavLinkProps) {
             href={href}
             onClick={handleClick}
             className={`relative px-3 py-1 rounded hover:bg-blue-600 transition duration-300
-        ${isActive ? 'font-bold text-blue-100 bg-blue-600' : 'text-white'}`}
+        ${isActive ? 'font-bold text-white bg-blue-600' : 'text-white'}`}
         >
             {children}
         </Link>

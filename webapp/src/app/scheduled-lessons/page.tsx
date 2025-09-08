@@ -13,7 +13,7 @@ export default async function ScheduledLessonsPage() {
             <div className="flex justify-between items-center mb-10">
                 <h1 className="text-4xl font-bold text-orange-700">Scheduled Lessons</h1>
                 <AdminOnly>
-                    <Link href="/scheduled-lessons/add" className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700">
+                    <Link href="/scheduled-lessons/add" className="bg-orange-700 text-white px-4 py-2 rounded-lg hover:bg-orange-700">
                         + Add Scheduled Lesson
                     </Link>
                 </AdminOnly>

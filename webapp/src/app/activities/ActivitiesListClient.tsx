@@ -39,7 +39,7 @@ export default function ActivitiesListClient() {
                             <AdminOnly>
                                 <Link
                                     href={`/activities/${activity.id}/edit`}
-                                    className="inline-block bg-gray-100 border-green-600 border hover:border-2 text-white px-2 py-2 rounded-lg transition duration-300"
+                                    className="inline-block bg-gray-100 border-green-800 border hover:border-2 text-white px-2 py-2 rounded-lg transition duration-300"
                                 >
                                     📝
                                 </Link>
