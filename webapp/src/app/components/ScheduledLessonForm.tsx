@@ -213,7 +213,7 @@ export default function ScheduledLessonForm({ initialScheduledLesson }: Schedule
                             Scheduled Start Time:
                         </label>
                         <time
-                            dateTime={startTime}
+                            dateTime={startTime instanceof Date ? startTime.toISOString() : startTime}
                             className="block text-gray-700 text-sm mb-2 p-2 bg-gray-50 rounded border"
                         >
                             {moment(startTime).format('YYYY-MM-DD HH:mm')}

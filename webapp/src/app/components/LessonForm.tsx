@@ -366,7 +366,7 @@ export default function LessonForm({ initialLesson }: LessonFormProps) {
                             Confirm Delete
                         </h2>
                         <p id="delete-dialog-description" className="text-gray-700 mb-6">
-                            Are you sure you want to delete the lesson "{initialLesson?.name}"? This action cannot be undone.
+                            {`Are you sure you want to delete the lesson ${initialLesson?.name}? This action cannot be undone.`}
                         </p>
                         <div className="flex gap-3 justify-end">
                             <button

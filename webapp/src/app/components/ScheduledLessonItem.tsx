@@ -32,7 +32,7 @@ export function ScheduledLessonItem({ scheduledLesson, availableLessonsMode }: S
                         {scheduledLesson.startTime && (
                             <p className="text-gray-700 text-sm">
                                 <span className="font-medium">Start time:</span>
-                                <time dateTime={scheduledLesson.startTime}>
+                                <time dateTime={scheduledLesson.startTime instanceof Date ? scheduledLesson.startTime.toISOString() : scheduledLesson.startTime}>
                                     {moment(scheduledLesson.startTime).format('YYYY-MM-DD HH:mm')}
                                 </time>
                             </p>
