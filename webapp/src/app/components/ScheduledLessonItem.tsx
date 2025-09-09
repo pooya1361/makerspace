@@ -37,6 +37,16 @@ export function ScheduledLessonItem({ scheduledLesson, availableLessonsMode }: S
                                 </time>
                             </p>
                         )}
+                        {availableLessonsMode ?
+                            <div className="flex flex-col mb-4 text-gray-700">
+                                {scheduledLesson.proposedTimeSlots.map((proposedTimeSlot) => (
+                                    <span key={proposedTimeSlot.id}>
+                                        {moment(proposedTimeSlot.proposedStartTime).format('YYYY-MM-DD HH:mm')}
+                                    </span>
+                                ))}
+                            </div>
+                            : undefined
+                        }
                     </div>
                 </div>
                 <div className={'flex gap-3  items-center ' + (availableLessonsMode ? 'justify-end' : 'justify-between')}>
